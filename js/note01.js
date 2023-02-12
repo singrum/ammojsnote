@@ -1,5 +1,7 @@
+
 import * as THREE from '../node_modules/three/build/three.module.js';
 import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
+
 
 class App {
 	constructor() {
@@ -16,16 +18,85 @@ class App {
 		const scene = new THREE.Scene();
 		this._scene = scene;
 
+        this._clock = new THREE.Clock();
+
 		this._setupCamera();
 		this._setupLight();
-		this._setupModel();
-		this._setupControls()
+        this._setupAmmo();
+		//this._setupModel();
+		this._setupControls();
+        this._setupShot();
 
 		window.onresize = this.resize.bind(this);
 		this.resize();
 
 		requestAnimationFrame(this.render.bind(this));
 	}
+
+    _setupShot(){
+        const raycaster = new THREE.Raycaster();
+        window.addEventListener("click", event =>{
+            if(!event.ctrlKey) return;
+            const width = this._divContainer.clientWidth;
+            const height = this._divContainer.clientHeight;
+            const pt = {
+                x: (event.clientX / width) * 2 - 1,
+                y: - (event.clientY / height) * 2 + 1
+            }
+            raycaster.setFromCamera(pt, this._camera);
+            const tmpPos = new THREE.Vector3();
+            tmpPos.copy(raycaster.ray.origin);
+
+            const pos = {x: tmpPos.x, y: tmpPos.y, z: tmpPos.z};
+            const radius = 0.25;
+            const quat = {x: 0, y: 0, z: 0, w:1};
+            const mass = 1;
+
+            const ball = new THREE.Mesh(
+                new THREE.SphereBufferGeometry(radius),
+                new THREE.MeshStandardMaterial({color: 0xff0000, metalness: 0.7, roughness: 0.4})
+            )
+            ball.position.set(pos.x, pos.y, pos.z);
+            this._scene.add(ball);
+
+            const transform = new Ammo.btTransform();
+            transform.setIdentity();
+            transform.setOrigin( new Ammo.btVector3( pos.x, pos.y, pos.z ) );
+            transform.setRotation( new Ammo.btQuaternion( quat.x, quat.y, quat.z, quat.w ) );
+            const motionState = new Ammo.btDefaultMotionState( transform );
+            const colShape = new Ammo.btSphereShape( radius );
+            colShape.calculateLocalInertia( mass);
+
+            const rbInfo = new Ammo.btRigidBodyConstructionInfo( mass, motionState, colShape);
+            const body = new Ammo.btRigidBody( rbInfo );
+
+            this._physicsWorld.addRigidBody( body );
+
+            tmpPos.copy(raycaster.ray.direction);
+            tmpPos.multiplyScalar(20);
+
+            body.setLinearVelocity( new Ammo.btVector3( tmpPos.x, tmpPos.y, tmpPos.z ) );
+            
+            ball.physicsBody = body;        
+        })
+    }
+
+    _setupAmmo(){
+        Ammo().then(() => {
+            const overlappingPairCache = new Ammo.btDbvtBroadphase();
+            const collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
+            const dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
+            const solver = new Ammo.btSequentialImpulseConstraintSolver();
+
+            const physicsWorld = new Ammo.btDiscreteDynamicsWorld(
+                dispatcher, overlappingPairCache, solver, collisionConfiguration);
+            physicsWorld.setGravity(new Ammo.btVector3(0, -9.807, 0));
+
+            this._physicsWorld = physicsWorld;
+            this._setupModel();
+            
+        })
+    }
 
 	_setupControls(){
 		new OrbitControls(this._camera, this._divContainer);
@@ -43,6 +114,23 @@ class App {
         table.scale.set(scale.x, scale.y, scale.z);
         table.receiveShadow = true;
         this._scene.add(table)
+
+        const transform = new Ammo.btTransform();
+        const quaternion = {x: 0, y: 0, z: 0, w: 1};
+        transform.setIdentity();
+        transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+        transform.setRotation(
+            new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
+        const motionState = new Ammo.btDefaultMotionState(transform);
+        const colShape = new Ammo.btBoxShape(
+            new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
+
+        const mass = 0;
+        colShape.calculateLocalInertia(mass);
+        const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape);
+        const body = new Ammo.btRigidBody(rbInfo);
+        this._physicsWorld.addRigidBody(body)
+
     }
 
     _createDomino(){
@@ -95,7 +183,7 @@ class App {
         const scale = {x: 0.75, y: 1, z: 0.1};
         const dominoGeometry = new THREE.BoxGeometry();
         const dominoMaterial = new THREE.MeshNormalMaterial();
-
+        const mass = 1;
         const step = 0.0001;
         let length = 0.0;
         for(let t=0; t<1.0; t+=step){
@@ -109,11 +197,30 @@ class App {
                 domino.position.copy(pt1);
                 domino.scale.set(scale.x, scale.y, scale.z);
                 domino.lookAt(pt2);
+
+                const quaternion = new THREE.Quaternion();
+                quaternion.setFromEuler(domino.rotation)
                 
                 domino.castShadow = true;
                 domino.receiveShadow = true;
                 this._scene.add(domino);
                 
+                const transform = new Ammo.btTransform();
+                transform.setIdentity();
+                transform.setOrigin(new Ammo.btVector3(pt1.x, pt1.y, pt1.z));
+                transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
+                const motionState = new Ammo.btDefaultMotionState(transform);
+                const colShape = new Ammo.btBoxShape(new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
+
+                const localInertia = new Ammo.btVector3(0,0,0);
+                colShape.calculateLocalInertia(mass, localInertia);
+
+                const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+                const body = new Ammo.btRigidBody(rbInfo);
+                this._physicsWorld.addRigidBody(body);
+
+                domino.physicsBody = body;
+
                 length = 0.0
             }
         }
@@ -166,8 +273,32 @@ class App {
 
 	update(time) {
 		time *= 0.001;
-		// this._cube.rotation.x = time;
-		// this._cube.rotation.y = time;
+		
+        const deltaTime = this._clock.getDelta();
+
+        if(this._physicsWorld){
+            this._physicsWorld.stepSimulation(deltaTime);
+            this._scene.traverse(obj3d => {
+                if(obj3d instanceof THREE.Mesh){
+                    const objThree = obj3d;
+                    const objAmmo = objThree.physicsBody;
+                    if(objAmmo){
+                        const motionState = objAmmo.getMotionState();
+                        if(motionState){
+                            let tmpTrans = this._tmpTrans;
+                            if(tmpTrans === undefined) tmpTrans = this._tmpTrans = new Ammo.btTransform();
+                            motionState.getWorldTransform(tmpTrans);
+                            
+                            const pos = tmpTrans.getOrigin();
+                            const quat = tmpTrans.getRotation();
+
+                            objThree.position.set(pos.x(), pos.y(), pos.z());
+                            objThree.quaternion.set(quat.x(), quat.y(), quat.z(), quat.w());
+                        }
+                    }
+                }
+            })
+        }
 	}
 }
 
