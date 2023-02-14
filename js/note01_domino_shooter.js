@@ -53,7 +53,7 @@ class App {
             const mass = 1;
 
             const ball = new THREE.Mesh(
-                new THREE.SphereBufferGeometry(radius),
+                new THREE.SphereGeometry(radius),
                 new THREE.MeshStandardMaterial({color: 0xff0000, metalness: 0.7, roughness: 0.4})
             )
             ball.position.set(pos.x, pos.y, pos.z);
@@ -94,7 +94,6 @@ class App {
 
             this._physicsWorld = physicsWorld;
             this._setupModel();
-            
         })
     }
 
