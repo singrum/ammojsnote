@@ -1,4 +1,5 @@
 
+
 import * as THREE from '../node_modules/three/build/three.module.js';
 import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
 
@@ -26,7 +27,7 @@ class App {
 		//this._setupModel();
 		this._setupControls();
         this._setupClicker();
-        // this._setupShot();
+        this._setupShot();
 
 		window.onresize = this.resize.bind(this);
 		this.resize();
@@ -35,8 +36,11 @@ class App {
 	}
     _setupShot(){
         const raycaster = new THREE.Raycaster();
-        window.addEventListener("click", event =>{
-            if(!event.ctrlKey) return;
+        window.addEventListener("click", event => listener);
+
+        
+        function listener(event){
+            if(!event.shiftKey) return;
             const width = this._divContainer.clientWidth;
             const height = this._divContainer.clientHeight;
             const pt = {
@@ -78,12 +82,31 @@ class App {
             body.setLinearVelocity( new Ammo.btVector3( tmpPos.x, tmpPos.y, tmpPos.z ) );
             
             ball.physicsBody = body;        
-        })
+        }
+
+
+
     }
     _setupClicker(){
         const raycaster = new THREE.Raycaster();
-        window.addEventListener("click", event =>{
-            if(!event.ctrlKey) return;
+        // window.addEventListener("click", event =>{
+        //     if(!event.ctrlKey) return;
+        //     const width = this._divContainer.clientWidth;
+        //     const height = this._divContainer.clientHeight;
+        //     const pt = {
+        //         x: (event.clientX / width) * 2 - 1,
+        //         y: - (event.clientY / height) * 2 + 1
+        //     }
+        //     raycaster.setFromCamera(pt, this._camera);
+        //     const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
+        //     console.log(raycaster)
+        //     console.log(clickedPoint)
+        //     this.makeDomino(clickedPoint)
+
+
+        // })
+
+        function listener(event){
             const width = this._divContainer.clientWidth;
             const height = this._divContainer.clientHeight;
             const pt = {
@@ -95,8 +118,39 @@ class App {
             console.log(raycaster)
             console.log(clickedPoint)
             this.makeDomino(clickedPoint)
+        }
+        
+        
+        // touch event
+        this.touchStartPos = null;
+        this.isMoved = false
+        
 
+        window.addEventListener("touchstart", evt =>{
+            this.touchStartPos = [evt.touches[0].clientX, evt.touches[0].clientY];
+        })
+        window.addEventListener("touchmove", evt =>{
+            this.isMoved = true;
+        })
+        window.addEventListener("touchend", evt =>{
+            
+            if(!this.isMoved){
+                const width = this._divContainer.clientWidth;
+                const height = this._divContainer.clientHeight;
+                const pt = {
+                    x: (this.touchStartPos[0] / width) * 2 - 1,
+                    y: - (this.touchStartPos[1] / height) * 2 + 1
+                }
+                raycaster.setFromCamera(pt, this._camera);
+                const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
+                console.log(raycaster)
+                console.log(clickedPoint)
+                this.makeDomino(clickedPoint)
+            }
 
+            this.isMoved = false;
+            
+            
         })
     }
 
