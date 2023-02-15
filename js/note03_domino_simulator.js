@@ -155,23 +155,19 @@ class App {
 
         const positionAttribute = object.object.geometry.getAttribute( 'position' );
 
-        const vertex1 = new THREE.Vector3();
-        vertex1.fromBufferAttribute( positionAttribute, 0) 
-        const vertex1_world = object.object.localToWorld( vertex1 );
-
-        const vertex2 = new THREE.Vector3();
-        vertex2.fromBufferAttribute( positionAttribute, 5);
-        const vertex2_world = object.object.localToWorld( vertex2 );
         
-        console.log(object.faceIndex)
+        const vertex0_world = object.object.localToWorld((new THREE.Vector3()).fromBufferAttribute( positionAttribute, 0));
+        const vertex1_world = object.object.localToWorld((new THREE.Vector3()).fromBufferAttribute( positionAttribute, 1))
+        const vertex5_world = object.object.localToWorld((new THREE.Vector3()).fromBufferAttribute( positionAttribute, 5));
+        
         if(object.faceIndex === 8 || object.faceIndex === 9){
-            console.log(-(vertex1_world.x - vertex2_world.x)*10,-(vertex1_world.y - vertex2_world.y)*10,-(vertex1_world.z - vertex2_world.z)*10)
-            object.object.physicsBody.setAngularVelocity(new Ammo.btVector3(-(vertex1_world.x - vertex2_world.x)*10,-(vertex1_world.y - vertex2_world.y)*10,-(vertex1_world.z - vertex2_world.z)*10))
+            object.object.physicsBody.setAngularVelocity(new Ammo.btVector3(-(vertex0_world.x - vertex5_world.x)*10,-(vertex0_world.y - vertex5_world.y)*10,-(vertex0_world.z - vertex5_world.z)*10))
+            object.object.physicsBody.setLinearVelocity(new Ammo.btVector3((vertex1_world.x - vertex0_world.x)*10,(vertex1_world.y - vertex0_world.y)*10,(vertex1_world.z - vertex0_world.z)*10))
             
         }
         if(object.faceIndex === 10 || object.faceIndex === 11){
-            console.log((vertex1_world.x - vertex2_world.x)*10,(vertex1_world.y - vertex2_world.y)*10,(vertex1_world.z - vertex2_world.z)*10)
-            object.object.physicsBody.setAngularVelocity(new Ammo.btVector3((vertex1_world.x - vertex2_world.x)*10,(vertex1_world.y - vertex2_world.y)*10,(vertex1_world.z - vertex2_world.z)*10))
+            object.object.physicsBody.setAngularVelocity(new Ammo.btVector3((vertex0_world.x - vertex5_world.x)*10,(vertex0_world.y - vertex5_world.y)*10,(vertex0_world.z - vertex5_world.z)*10))
+            object.object.physicsBody.setLinearVelocity(new Ammo.btVector3(-(vertex1_world.x - vertex0_world.x)*10,-(vertex1_world.y - vertex0_world.y)*10,-(vertex1_world.z - vertex0_world.z)*10))
         }
         
     }
