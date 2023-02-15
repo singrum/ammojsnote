@@ -345,7 +345,7 @@ class App {
 	_setupCamera() {
 		const width = this._divContainer.clientWidth;
 		const height = this._divContainer.clientHeight;
-		const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 100);
+		const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
 		camera.position.set(0,10,10)
 		this._camera = camera;
 	}
