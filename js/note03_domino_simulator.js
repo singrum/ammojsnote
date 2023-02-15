@@ -21,12 +21,15 @@ class App {
 
         this._clock = new THREE.Clock();
 
+        this._firstDomino = null;
+
+        this._dominoOrShot = 0;
+
 		this._setupCamera();
 		this._setupLight();
         this._setupAmmo();
-		//this._setupModel();
 		this._setupControls();
-        this._setupClicker();
+        this._setupDominoMaker();
         this._setupShot();
 
 		window.onresize = this.resize.bind(this);
@@ -36,10 +39,7 @@ class App {
 	}
     _setupShot(){
         const raycaster = new THREE.Raycaster();
-        window.addEventListener("click", event => listener);
-
-        
-        function listener(event){
+        window.addEventListener("click", event => {
             if(!event.shiftKey) return;
             const width = this._divContainer.clientWidth;
             const height = this._divContainer.clientHeight;
@@ -61,6 +61,7 @@ class App {
                 new THREE.MeshStandardMaterial({color: 0xff0000, metalness: 0.7, roughness: 0.4})
             )
             ball.position.set(pos.x, pos.y, pos.z);
+            ball.castShadow = true;
             this._scene.add(ball);
 
             const transform = new Ammo.btTransform();
@@ -81,32 +82,20 @@ class App {
 
             body.setLinearVelocity( new Ammo.btVector3( tmpPos.x, tmpPos.y, tmpPos.z ) );
             
-            ball.physicsBody = body;        
-        }
+            ball.physicsBody = body;    
+        });
+
+        
 
 
 
     }
-    _setupClicker(){
+    _setupDominoMaker(){
         const raycaster = new THREE.Raycaster();
-        // window.addEventListener("click", event =>{
-        //     if(!event.ctrlKey) return;
-        //     const width = this._divContainer.clientWidth;
-        //     const height = this._divContainer.clientHeight;
-        //     const pt = {
-        //         x: (event.clientX / width) * 2 - 1,
-        //         y: - (event.clientY / height) * 2 + 1
-        //     }
-        //     raycaster.setFromCamera(pt, this._camera);
-        //     const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
-        //     console.log(raycaster)
-        //     console.log(clickedPoint)
-        //     this.makeDomino(clickedPoint)
 
-
-        // })
-
-        function listener(event){
+        // click event
+        window.addEventListener("click", event =>{
+            if(!event.ctrlKey) return;
             const width = this._divContainer.clientWidth;
             const height = this._divContainer.clientHeight;
             const pt = {
@@ -115,10 +104,10 @@ class App {
             }
             raycaster.setFromCamera(pt, this._camera);
             const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
-            console.log(raycaster)
-            console.log(clickedPoint)
             this.makeDomino(clickedPoint)
-        }
+
+
+        })
         
         
         // touch event
@@ -142,10 +131,24 @@ class App {
                     y: - (this.touchStartPos[1] / height) * 2 + 1
                 }
                 raycaster.setFromCamera(pt, this._camera);
-                const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
-                console.log(raycaster)
-                console.log(clickedPoint)
-                this.makeDomino(clickedPoint)
+
+                if(this._firstDomino){
+                    const interObj = raycaster.intersectObjects([this._plane, this._firstDomino])
+                    console.log(interObj)
+                    if (interObj.length === 2){
+                        this.pull(interObj[0]);
+                    }
+                    else{
+                        this.pull(interObj[0].object);
+                    }
+                    
+                }
+                else{
+                    const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
+                    this._firstDomino = this.makeDomino(clickedPoint)
+                    
+                }
+
             }
 
             this.isMoved = false;
@@ -155,14 +158,14 @@ class App {
     }
 
     debugPoint(pos){
-                    const geometry = new THREE.BufferGeometry();
+            const geometry = new THREE.BufferGeometry();
             geometry.setAttribute(
                 "position",
                 new THREE.Float32BufferAttribute([pos.x, pos.y, pos.z], 3)
             );
     
             const material = new THREE.PointsMaterial({
-                color:0xff0000,
+                color:0xff38a2,
                 size: 5,
                 sizeAttenuation : false
             })
@@ -171,19 +174,27 @@ class App {
     }
 
     makeDomino(pos){
+        
         const scale = {x: 0.75, y: 1, z: 0.1};
         const dominoGeometry = new THREE.BoxGeometry();
-        const dominoMaterial = new THREE.MeshPhysicalMaterial();
+        const dominoMaterial = new THREE.MeshPhysicalMaterial({color : 0xb3e3ff}); 
+        
+        
         const domino = new THREE.Mesh(dominoGeometry, dominoMaterial);
+
+        
+
 
 
         const mass = 1;
         
         domino.scale.set(scale.x, scale.y, scale.z);
         domino.position.set(pos.x, scale.y / 2, pos.z)
-        console.log(this._camera)
         domino.lookAt(this._camera.position.x, scale.y / 2, this._camera.position.z);
-
+        if(!this._firstDomino) {
+            this._firstDomino = domino
+            this.debugPoint({x: pos.x, y: scale.y + 0.1, z: pos.z})
+        }        
         
         domino.castShadow = true;
         domino.receiveShadow = true;
@@ -207,7 +218,7 @@ class App {
         this._physicsWorld.addRigidBody(body);
 
         domino.physicsBody = body;
-
+        return domino
     }
 
     _setupAmmo(){
