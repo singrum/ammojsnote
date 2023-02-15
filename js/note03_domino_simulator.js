@@ -30,7 +30,7 @@ class App {
         this._setupAmmo();
 		this._setupControls();
         this._setupDominoMaker();
-        this._setupShot();
+        // this._setupShot();
 
 		window.onresize = this.resize.bind(this);
 		this.resize();
@@ -84,12 +84,9 @@ class App {
             
             ball.physicsBody = body;    
         });
-
-        
-
-
-
     }
+
+
     _setupDominoMaker(){
         const raycaster = new THREE.Raycaster();
 
@@ -105,8 +102,6 @@ class App {
             raycaster.setFromCamera(pt, this._camera);
             const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
             this.makeDomino(clickedPoint)
-
-
         })
         
         
@@ -114,7 +109,6 @@ class App {
         this.touchStartPos = null;
         this.isMoved = false
         
-
         window.addEventListener("touchstart", evt =>{
             this.touchStartPos = [evt.touches[0].clientX, evt.touches[0].clientY];
         })
@@ -133,13 +127,13 @@ class App {
                 raycaster.setFromCamera(pt, this._camera);
 
                 if(this._firstDomino){
-                    const interObj = raycaster.intersectObjects([this._plane, this._firstDomino])
-                    console.log(interObj)
-                    if (interObj.length === 2){
+                    const interObj = raycaster.intersectObjects([this._firstDomino,this._plane])
+                    if (interObj[0].object.geometry instanceof THREE.BoxGeometry){
+                        console.log(interObj[0])
                         this.pull(interObj[0]);
                     }
                     else{
-                        this.pull(interObj[0].object);
+                        this.makeDomino(interObj[0].point);
                     }
                     
                 }
@@ -155,6 +149,31 @@ class App {
             
             
         })
+    }
+    pull(object){
+        
+
+        const positionAttribute = object.object.geometry.getAttribute( 'position' );
+
+        const vertex1 = new THREE.Vector3();
+        vertex1.fromBufferAttribute( positionAttribute, 0) 
+        const vertex1_world = object.object.localToWorld( vertex1 );
+
+        const vertex2 = new THREE.Vector3();
+        vertex2.fromBufferAttribute( positionAttribute, 5);
+        const vertex2_world = object.object.localToWorld( vertex2 );
+        
+        console.log(object.faceIndex)
+        if(object.faceIndex === 8 || object.faceIndex === 9){
+            console.log(-(vertex1_world.x - vertex2_world.x)*10,-(vertex1_world.y - vertex2_world.y)*10,-(vertex1_world.z - vertex2_world.z)*10)
+            object.object.physicsBody.setAngularVelocity(new Ammo.btVector3(-(vertex1_world.x - vertex2_world.x)*10,-(vertex1_world.y - vertex2_world.y)*10,-(vertex1_world.z - vertex2_world.z)*10))
+            
+        }
+        if(object.faceIndex === 10 || object.faceIndex === 11){
+            console.log((vertex1_world.x - vertex2_world.x)*10,(vertex1_world.y - vertex2_world.y)*10,(vertex1_world.z - vertex2_world.z)*10)
+            object.object.physicsBody.setAngularVelocity(new Ammo.btVector3((vertex1_world.x - vertex2_world.x)*10,(vertex1_world.y - vertex2_world.y)*10,(vertex1_world.z - vertex2_world.z)*10))
+        }
+        
     }
 
     debugPoint(pos){
