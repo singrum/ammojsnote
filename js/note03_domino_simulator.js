@@ -166,6 +166,7 @@ class App {
             
         }
         if(object.faceIndex === 10 || object.faceIndex === 11){
+            console.log(object.object)
             object.object.physicsBody.setAngularVelocity(new Ammo.btVector3((vertex0_world.x - vertex5_world.x)*10,(vertex0_world.y - vertex5_world.y)*10,(vertex0_world.z - vertex5_world.z)*10))
             object.object.physicsBody.setLinearVelocity(new Ammo.btVector3(-(vertex1_world.x - vertex0_world.x)*10,-(vertex1_world.y - vertex0_world.y)*10,-(vertex1_world.z - vertex0_world.z)*10))
         }
