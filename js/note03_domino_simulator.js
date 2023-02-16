@@ -27,6 +27,7 @@ class App {
         this._dominoStack = [];
 
 		this._setupCamera();
+        this._setupBackground();
 		this._setupLight();
         this._setupAmmo();
 		this._setupControls();
@@ -38,6 +39,9 @@ class App {
 
 		requestAnimationFrame(this.render.bind(this));
 	}
+    _setupBackground(){
+        
+    }
     _setupBackButton(){
         const backButton = document.querySelector("#back")
         backButton.addEventListener('click', evt => {
