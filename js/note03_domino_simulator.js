@@ -46,8 +46,6 @@ class App {
             }
             
             const domino = this._dominoStack.pop()
-            console.log(this._dominoStack)
-            console.log(domino)
             this._scene.remove(domino)
         })
     }
@@ -174,7 +172,6 @@ class App {
             this._firstDomino = domino
         }             
         this._dominoStack.push(domino)
-        console.log(this._dominoStack)
         
 
 
