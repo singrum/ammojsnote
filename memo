@@ -1,0 +1,192 @@
+activate
+: 
+ƒ (a)
+applyCentralForce
+: 
+ƒ (a)
+applyCentralImpulse
+: 
+ƒ (a)
+applyCentralLocalForce
+: 
+ƒ (a)
+applyForce
+: 
+ƒ (a,c)
+applyGravity
+: 
+ƒ ()
+applyImpulse
+: 
+ƒ (a,c)
+applyLocalTorque
+: 
+ƒ (a)
+applyTorque
+: 
+ƒ (a)
+applyTorqueImpulse
+: 
+ƒ (a)
+clearForces
+: 
+ƒ ()
+constructor
+: 
+ƒ I(a)
+forceActivationState
+: 
+ƒ (a)
+getAabb
+: 
+ƒ (a,c)
+getAngularDamping
+: 
+ƒ ()
+getAngularFactor
+: 
+ƒ ()
+getAngularVelocity
+: 
+ƒ ()
+getBroadphaseHandle
+: 
+ƒ ()
+getBroadphaseProxy
+: 
+ƒ ()
+getCenterOfMassTransform
+: 
+ƒ ()
+getCollisionFlags
+: 
+ƒ ()
+getCollisionShape
+: 
+ƒ ()
+getFriction
+: 
+ƒ ()
+getGravity
+: 
+ƒ ()
+getLinearDamping
+: 
+ƒ ()
+getLinearFactor
+: 
+ƒ ()
+getLinearVelocity
+: 
+ƒ ()
+getMotionState
+: 
+ƒ ()
+getRestitution
+: 
+ƒ ()
+getRollingFriction
+: 
+ƒ ()
+getUserIndex
+: 
+ƒ ()
+getUserPointer
+: 
+ƒ ()
+getWorldTransform
+: 
+ƒ ()
+isActive
+: 
+ƒ ()
+isKinematicObject
+: 
+ƒ ()
+isStaticObject
+: 
+ƒ ()
+isStaticOrKinematicObject
+: 
+ƒ ()
+iy
+: 
+ƒ I(a)
+setActivationState
+: 
+ƒ (a)
+setAngularFactor
+: 
+ƒ (a)
+setAngularVelocity
+: 
+ƒ (a)
+setAnisotropicFriction
+: 
+ƒ (a,c)
+setCcdMotionThreshold
+: 
+ƒ (a)
+setCcdSweptSphereRadius
+: 
+ƒ (a)
+setCenterOfMassTransform
+: 
+ƒ (a)
+setCollisionFlags
+: 
+ƒ (a)
+setCollisionShape
+: 
+ƒ (a)
+setContactProcessingThreshold
+: 
+ƒ (a)
+setDamping
+: 
+ƒ (a,c)
+setFriction
+: 
+ƒ (a)
+setGravity
+: 
+ƒ (a)
+setLinearFactor
+: 
+ƒ (a)
+setLinearVelocity
+: 
+ƒ (a)
+setMassProps
+: 
+ƒ (a,c)
+setMotionState
+: 
+ƒ (a)
+setRestitution
+: 
+ƒ (a)
+setRollingFriction
+: 
+ƒ (a)
+setSleepingThresholds
+: 
+ƒ (a,c)
+setUserIndex
+: 
+ƒ (a)
+setUserPointer
+: 
+ƒ (a)
+setWorldTransform
+: 
+ƒ (a)
+upcast
+: 
+ƒ (a)
+updateInertiaTensor
+: 
+ƒ ()
+__destroy__
+: 
+ƒ ()

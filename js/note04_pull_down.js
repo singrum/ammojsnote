@@ -23,34 +23,20 @@ class App {
 
         this._firstDomino = null;
 
-        
-        this._dominoStack = [];
+        this._dominoOrShot = 0;
 
 		this._setupCamera();
 		this._setupLight();
         this._setupAmmo();
 		this._setupControls();
         this._setupDominoMaker();
-        this._setupBackButton();
+        // this._setupShot();
 
 		window.onresize = this.resize.bind(this);
 		this.resize();
 
 		requestAnimationFrame(this.render.bind(this));
 	}
-    _setupBackButton(){
-        const backButton = document.querySelector("#back")
-        backButton.addEventListener('click', evt => {
-            if(this._dominoStack.length === 1){
-                this._firstDomino = null;
-            }
-            
-            const domino = this._dominoStack.pop()
-            console.log(this._dominoStack)
-            console.log(domino)
-            this._scene.remove(domino)
-        })
-    }
 
 
     _setupDominoMaker(){
@@ -94,25 +80,18 @@ class App {
 
                 if(this._firstDomino){
                     const interObj = raycaster.intersectObjects([this._firstDomino,this._plane])
-                    if(interObj[0]){
-                        if (interObj[0].object === this._firstDomino){
+                    if (interObj[0].object === this._firstDomino){
                         
-                            this.pull(interObj[0]);
-                        }
-                        else{
-                            this.makeDomino(interObj[0].point);
-                        }
+                        this.pull(interObj[0]);
                     }
-
+                    else{
+                        this.makeDomino(interObj[0].point);
+                    }
                     
                 }
                 else{
-                    const interObj = raycaster.intersectObjects([this._plane]);
-                    if(interObj[0]){
-                        this._firstDomino = this.makeDomino(interObj[0].point)
-                    }
-        
-                    
+                    const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
+                    this._firstDomino = this.makeDomino(clickedPoint)
                     
                 }
 
@@ -134,14 +113,15 @@ class App {
         const vertex5_world = object.object.localToWorld((new THREE.Vector3()).fromBufferAttribute( positionAttribute, 5));
         
         if(object.faceIndex === 8 || object.faceIndex === 9){
-            
-            object.object.physicsBody.applyTorque(new Ammo.btVector3(-(vertex0_world.x - vertex5_world.x)*10,-(vertex0_world.y - vertex5_world.y)*10,-(vertex0_world.z - vertex5_world.z)*10))
-            object.object.physicsBody.applyForce(new Ammo.btVector3((vertex1_world.x - vertex0_world.x)*10,(vertex1_world.y - vertex0_world.y)*10,(vertex1_world.z - vertex0_world.z)*10))
+            console.log(object.object)
+            object.object.physicsBody.setAngularVelocity(new Ammo.btVector3(-(vertex0_world.x - vertex5_world.x)*10,-(vertex0_world.y - vertex5_world.y)*10,-(vertex0_world.z - vertex5_world.z)*10))
+            object.object.physicsBody.setLinearVelocity(new Ammo.btVector3((vertex1_world.x - vertex0_world.x)*10,(vertex1_world.y - vertex0_world.y)*10,(vertex1_world.z - vertex0_world.z)*10))
             
         }
         if(object.faceIndex === 10 || object.faceIndex === 11){
-            object.object.physicsBody.applyTorque(new Ammo.btVector3((vertex0_world.x - vertex5_world.x)*10,(vertex0_world.y - vertex5_world.y)*10,(vertex0_world.z - vertex5_world.z)*10))
-            object.object.physicsBody.applyForce(new Ammo.btVector3(-(vertex1_world.x - vertex0_world.x)*10,-(vertex1_world.y - vertex0_world.y)*10,-(vertex1_world.z - vertex0_world.z)*10))
+            
+            object.object.physicsBody.setAngularVelocity(new Ammo.btVector3((vertex0_world.x - vertex5_world.x)*10,(vertex0_world.y - vertex5_world.y)*10,(vertex0_world.z - vertex5_world.z)*10))
+            object.object.physicsBody.setLinearVelocity(new Ammo.btVector3(-(vertex1_world.x - vertex0_world.x)*10,-(vertex1_world.y - vertex0_world.y)*10,-(vertex1_world.z - vertex0_world.z)*10))
         }
         
     }
@@ -166,15 +146,11 @@ class App {
         
         const scale = {x: 0.75, y: 1, z: 0.1};
         const dominoGeometry = new THREE.BoxGeometry();
-        const dominoMaterial = new THREE.MeshPhysicalMaterial({color : this._firstDomino ? 0xb3e3ff : 0xffff00}); 
- 
+        const dominoMaterial = new THREE.MeshPhysicalMaterial({color : 0xb3e3ff}); 
+        
         
         const domino = new THREE.Mesh(dominoGeometry, dominoMaterial);
-        if(!this._firstDomino) {
-            this._firstDomino = domino
-        }             
-        this._dominoStack.push(domino)
-        console.log(this._dominoStack)
+
         
 
 
@@ -184,7 +160,10 @@ class App {
         domino.scale.set(scale.x, scale.y, scale.z);
         domino.position.set(pos.x, scale.y / 2, pos.z)
         domino.lookAt(this._camera.position.x, scale.y / 2, this._camera.position.z);
- 
+        if(!this._firstDomino) {
+            this._firstDomino = domino
+            this.debugPoint({x: pos.x, y: scale.y + 0.1, z: pos.z})
+        }        
         
         domino.castShadow = true;
         domino.receiveShadow = true;
@@ -241,6 +220,7 @@ class App {
         plane.rotation.x = THREE.MathUtils.degToRad(-90);
         this._scene.add(plane)
         this._plane = plane
+        
 
         const tableGeometry = new THREE.BoxGeometry();
         const tableMaterial = new THREE.MeshPhongMaterial({color: 0x878787});
@@ -317,6 +297,7 @@ class App {
 		const height = this._divContainer.clientHeight;
 		const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
 		camera.position.set(0,10,10)
+        camera.lookAt(0,0,0)
 		this._camera = camera;
 	}
 
@@ -361,11 +342,12 @@ class App {
 		time *= 0.001;
 		
         const deltaTime = this._clock.getDelta();
-        
+
         if(this._physicsWorld){
-            this._physicsWorld.stepSimulation(deltaTime);
-            
-            if( this._firstDomino && this._firstDomino.physicsBody.isActive()) this._firstDomino.physicsBody.activate();
+            this._physicsWorld.stepSimulation(deltaTime, 10);
+            if(this._firstDomino)
+            this._firstDomino.physicsBody.setAngularVelocity(new Ammo.btVector3(1,1,1))
+
             this._scene.traverse(obj3d => {
                 if(obj3d instanceof THREE.Mesh){
                     const objThree = obj3d;
