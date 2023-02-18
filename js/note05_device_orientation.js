@@ -21,9 +21,9 @@ class App {
         this._clock = new THREE.Clock();
 
 		this._setupCamera();
-        this._setupControls();
 		this._setupLight();
         this._setupAmmo();
+        this._setupControls();
 
 		window.onresize = this.resize.bind(this);
 		this.resize();
@@ -52,17 +52,16 @@ class App {
 	}
 
     _createWall(){
-        const position = {x: 0, y: 0, z: 0};
-        const scale = {x:30, y:30, z: 1};
+        const position = {x: 0, y: 0, z: -10};
+        const scale = {x:2 * 2, y:5*2, z: 1};
+        const Geometry = new THREE.BoxGeometry();
+        const Material = new THREE.MeshPhongMaterial({color: 0x878787});
+        const Wall = new THREE.Mesh(Geometry, Material);
 
-        const tableGeometry = new THREE.BoxGeometry();
-        const tableMaterial = new THREE.MeshPhongMaterial({color: 0x878787});
-        const table = new THREE.Mesh(tableGeometry, tableMaterial);
-
-        table.position.set(position.x, position.y, position.z);
-        table.scale.set(scale.x, scale.y, scale.z);
-        table.receiveShadow = true;
-        this._scene.add(table)
+        Wall.position.set(position.x, position.y, position.z);
+        Wall.scale.set(scale.x, scale.y, scale.z);
+        Wall.receiveShadow = true;
+        this._scene.add(Wall)
 
         const transform = new Ammo.btTransform();
         const quaternion = {x: 0, y: 0, z: 0, w: 1};
@@ -90,7 +89,7 @@ class App {
 		const width = this._divContainer.clientWidth;
 		const height = this._divContainer.clientHeight;
 		const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 100);
-		camera.position.set(0,0,100)
+		camera.position.set(0,0,0)
         camera.lookAt(0,0,0)
 		this._camera = camera;
 	}
@@ -102,7 +101,7 @@ class App {
 		const color = 0xffffff;
 		const intensity = 0.9;
 		const light = new THREE.DirectionalLight(color, intensity);
-		light.position.set(-10, 15, 10);
+		light.position.set(10, 10, 10);
 		this._scene.add(light);
 
         light.castShadow = true;
