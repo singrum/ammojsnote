@@ -45,7 +45,6 @@ class App {
                 const alpha = THREE.MathUtils.degToRad(evt.alpha);
                 const beta = THREE.MathUtils.degToRad(evt.beta);
                 const gamma = THREE.MathUtils.degToRad(evt.gamma);
-                alert(1);
                 document.querySelector("#debug").innerText = `alpha : ${this.round(alpha)}\nbeta : ${this.round(beta)}\ngamma : ${this.round(gamma)}`
                 alert(2);
                 this._physicsWorld.setGravity(new Ammo.btVector3(
