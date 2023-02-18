@@ -27,7 +27,7 @@ class App {
 
 		window.onresize = this.resize.bind(this);
 		this.resize();
-
+        
 		requestAnimationFrame(this.render.bind(this));
         
 	}
@@ -118,10 +118,13 @@ class App {
             colShape.calculateLocalInertia(mass);
             const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape);
             const body = new Ammo.btRigidBody(rbInfo);
+            wallArr[i].physicsBody = body;  
+            console.log(wallArr)
             body.setFriction(0.1)
             body.setRestitution(0.6)
             this._physicsWorld.addRigidBody(body)
         }
+        
         
 
     }
