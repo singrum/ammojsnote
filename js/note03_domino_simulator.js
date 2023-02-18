@@ -137,13 +137,13 @@ class App {
         
         if(object.faceIndex === 8 || object.faceIndex === 9){
             
-            object.object.physicsBody.applyTorque(new Ammo.btVector3(-(vertex0_world.x - vertex5_world.x)*10,-(vertex0_world.y - vertex5_world.y)*10,-(vertex0_world.z - vertex5_world.z)*10))
-            object.object.physicsBody.applyForce(new Ammo.btVector3((vertex1_world.x - vertex0_world.x)*10,(vertex1_world.y - vertex0_world.y)*10,(vertex1_world.z - vertex0_world.z)*10))
+            object.object.physicsBody.applyTorque(new Ammo.btVector3(-(vertex0_world.x - vertex5_world.x)*10,-(vertex0_world.y - vertex5_world.y)*30,-(vertex0_world.z - vertex5_world.z)*30))
+            object.object.physicsBody.applyForce(new Ammo.btVector3((vertex1_world.x - vertex0_world.x)*10,(vertex1_world.y - vertex0_world.y)*30,(vertex1_world.z - vertex0_world.z)*30))
             
         }
         if(object.faceIndex === 10 || object.faceIndex === 11){
-            object.object.physicsBody.applyTorque(new Ammo.btVector3((vertex0_world.x - vertex5_world.x)*10,(vertex0_world.y - vertex5_world.y)*10,(vertex0_world.z - vertex5_world.z)*10))
-            object.object.physicsBody.applyForce(new Ammo.btVector3(-(vertex1_world.x - vertex0_world.x)*10,-(vertex1_world.y - vertex0_world.y)*10,-(vertex1_world.z - vertex0_world.z)*10))
+            object.object.physicsBody.applyTorque(new Ammo.btVector3((vertex0_world.x - vertex5_world.x)*10,(vertex0_world.y - vertex5_world.y)*30,(vertex0_world.z - vertex5_world.z)*30))
+            object.object.physicsBody.applyForce(new Ammo.btVector3(-(vertex1_world.x - vertex0_world.x)*10,-(vertex1_world.y - vertex0_world.y)*30,-(vertex1_world.z - vertex0_world.z)*30))
         }
         
     }

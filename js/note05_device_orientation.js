@@ -23,7 +23,7 @@ class App {
 		this._setupCamera();
 		this._setupLight();
         this._setupAmmo();
-        this._setupControls();
+        this._setupOrientationControls();
 
 		window.onresize = this.resize.bind(this);
 		this.resize();
@@ -31,6 +31,15 @@ class App {
 		requestAnimationFrame(this.render.bind(this));
 	}
 
+    _setupOrientationControls(){
+        window.addEventListener('deviceorientation', evt=>{
+            console.log(evt)
+            const alpha = evt.alpha;
+            const beta = evt.beta;
+            const gamma = evt.gamma;
+            this._physicsWorld.setGravity(new Ammo.btVector3(9,0,0)); 
+        }, false);
+    }
     _setupAmmo(){
         Ammo().then(() => {
             const overlappingPairCache = new Ammo.btDbvtBroadphase();
@@ -40,7 +49,7 @@ class App {
 
             const physicsWorld = new Ammo.btDiscreteDynamicsWorld(
                 dispatcher, overlappingPairCache, solver, collisionConfiguration);
-            physicsWorld.setGravity(new Ammo.btVector3(0, 0, -9));
+            physicsWorld.setGravity(new Ammo.btVector3());
 
             this._physicsWorld = physicsWorld;
             this._setupModel();
@@ -108,7 +117,7 @@ class App {
 
     }
     _createObj(){
-        for(let i = 0; i<10; i++){
+        for(let i = 0; i<1; i++){
             const pos = {x: 0, y: 0, z: -2};
             const radius = 0.25;
             const quat = {x: 0, y: 0, z: 0, w:1};
@@ -214,6 +223,7 @@ class App {
                             objThree.position.set(pos.x(), pos.y(), pos.z());
                             objThree.quaternion.set(quat.x(), quat.y(), quat.z(), quat.w());
                         }
+                        console.log(objAmmo.isActive())
                     }
                 }
             })
