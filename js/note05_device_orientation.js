@@ -51,7 +51,7 @@ class App {
                 Math.cos(beta) * Math.sin(gamma) * 9,
                 -Math.sin(beta) * 9,
                 -Math.cos(beta) * Math.cos(gamma)) * 9); 
-                document.querySelector("#debug").innerText = `${round(this._physicsWorld.getGravity().x())}, ${round(this._physicsWorld.getGravity().y())}, ${round(this._physicsWorld.getGravity().z())}`;
+            document.querySelector("#debug").innerText = `${round(this._physicsWorld.getGravity().x())}, ${round(this._physicsWorld.getGravity().y())}, ${round(this._physicsWorld.getGravity().z())}`;
         }, false);
     }
     _setupAmmo(){

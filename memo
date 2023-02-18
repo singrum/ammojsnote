@@ -1,3 +1,5 @@
+physicsBody methods
+
 activate: ƒ (a)
 applyCentralForce: ƒ (a)
 applyCentralImpulse: ƒ (a)
@@ -17,8 +19,6 @@ getAngularFactor: ƒ ()
 getAngularVelocity: ƒ ()
 getBroadphaseHandle: ƒ ()
 getBroadphaseProxy: ƒ ()
-physicsBody methods
-
 getCenterOfMassTransform: ƒ ()
 getCollisionFlags: ƒ ()
 getCollisionShape: ƒ ()
