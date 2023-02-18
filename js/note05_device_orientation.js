@@ -46,7 +46,7 @@ class App {
             this._physicsWorld.setGravity(new Ammo.btVector3(
                 Math.cos(beta) * Math.sin(gamma) * 9,
                 -Math.sin(beta) * 9,
-                -Math.cos(alpha) * Math.cos(gamma)) * 9); 
+                -Math.cos(beta) * Math.cos(gamma)) * 9); 
         }, false);
     }
     _setupAmmo(){
