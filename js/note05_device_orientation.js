@@ -36,22 +36,27 @@ class App {
         return Math.round(num * 1000) / 1000;
     }
     _setupOrientationControls(){
-        window.addEventListener('deviceorientation', evt=>{
+        try {
+            window.addEventListener('deviceorientation', evt=>{
             
-            if( ! (evt.alpha && evt.beta && evt.gamma)){
-                return;
-            }
-            const alpha = THREE.MathUtils.degToRad(evt.alpha);
-            const beta = THREE.MathUtils.degToRad(evt.beta);
-            const gamma = THREE.MathUtils.degToRad(evt.gamma);
-            
-            document.querySelector("#debug").innerText = `alpha : ${round(alpha)}\nbeta : ${round(beta)}\ngamma : ${round(gamma)}`
-            this._physicsWorld.setGravity(new Ammo.btVector3(
-                Math.cos(beta) * Math.sin(gamma) * 9,
-                -Math.sin(beta) * 9,
-                -Math.cos(beta) * Math.cos(gamma)) * 9); 
-            document.querySelector("#debug").innerText = `${this.round(this._physicsWorld.getGravity().x())}, ${this.round(this._physicsWorld.getGravity().y())}, ${this.round(this._physicsWorld.getGravity().z())}`;
-        }, false);
+                if( ! (evt.alpha && evt.beta && evt.gamma)){
+                    return;
+                }
+                const alpha = THREE.MathUtils.degToRad(evt.alpha);
+                const beta = THREE.MathUtils.degToRad(evt.beta);
+                const gamma = THREE.MathUtils.degToRad(evt.gamma);
+                
+                document.querySelector("#debug").innerText = `alpha : ${round(alpha)}\nbeta : ${round(beta)}\ngamma : ${round(gamma)}`
+                this._physicsWorld.setGravity(new Ammo.btVector3(
+                    Math.cos(beta) * Math.sin(gamma) * 9,
+                    -Math.sin(beta) * 9,
+                    -Math.cos(beta) * Math.cos(gamma)) * 9); 
+                document.querySelector("#debug").innerText = `${this.round(this._physicsWorld.getGravity().x())}, ${this.round(this._physicsWorld.getGravity().y())}, ${this.round(this._physicsWorld.getGravity().z())}`;
+            }, false);
+          } catch (e) {
+            alert(e.name + ": " + e.message);
+          }
+        
     }
     _setupAmmo(){
         Ammo().then(() => {
