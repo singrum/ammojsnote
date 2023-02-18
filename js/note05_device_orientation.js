@@ -33,6 +33,7 @@ class App {
 	}
 
     _setupOrientationControls(){
+        console.log(this._physicsWorld.getGravity())
         window.addEventListener('deviceorientation', evt=>{
             
             if( ! (evt.alpha && evt.beta && evt.gamma)){
@@ -47,7 +48,7 @@ class App {
                 Math.cos(beta) * Math.sin(gamma) * 9,
                 -Math.sin(beta) * 9,
                 -Math.cos(beta) * Math.cos(gamma)) * 9); 
-                document.querySelector("#debug").innerText = this._physicsWorld
+                document.querySelector("#debug").innerText = `${this._physicsWorld.getGravity().x(), this._physicsWorld.getGravity().y(), this._physicsWorld.getGravity().z()}`;
         }, false);
     }
     _setupAmmo(){
