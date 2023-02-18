@@ -33,7 +33,7 @@ class App {
 
     _setupOrientationControls(){
         window.addEventListener('deviceorientation', evt=>{
-            console.log(evt)
+            
             if( ! (evt.alpha && evt.beta && evt.gamma)){
                 return;
             }
@@ -155,7 +155,7 @@ class App {
             ball.physicsBody = body;  
             body.setFriction(0.1)
             body.setRestitution(0.6)
-            console.log(body)
+            
         }
     }
 
