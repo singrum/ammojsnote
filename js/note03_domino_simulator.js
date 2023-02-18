@@ -51,6 +51,8 @@ class App {
             
             const domino = this._dominoStack.pop()
             this._scene.remove(domino)
+            console.log(this._physicsWorld)
+            this._physicsWorld.removeRigidBody(domino.physicsBody)
         })
     }
 
@@ -209,7 +211,9 @@ class App {
         this._physicsWorld.addRigidBody(body);
 
         domino.physicsBody = body;
+        
         return domino
+        
     }
 
     _setupAmmo(){
