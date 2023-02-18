@@ -124,7 +124,7 @@ class App {
 
     }
     _createObj(){
-        for(let i = 0; i<1; i++){
+        for(let i = 0; i<10; i++){
             const pos = {x: 0, y: 0, z: -2};
             const radius = 0.25;
             const quat = {x: 0, y: 0, z: 0, w:1};
