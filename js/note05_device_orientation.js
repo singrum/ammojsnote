@@ -40,7 +40,7 @@ class App {
 
             const physicsWorld = new Ammo.btDiscreteDynamicsWorld(
                 dispatcher, overlappingPairCache, solver, collisionConfiguration);
-            physicsWorld.setGravity(new Ammo.btVector3(0, -9.807, 0));
+            physicsWorld.setGravity(new Ammo.btVector3(0, 0, -9));
 
             this._physicsWorld = physicsWorld;
             this._setupModel();
@@ -52,36 +52,88 @@ class App {
 	}
 
     _createWall(){
-        const position = {x: 0, y: 0, z: -10};
-        const scale = {x:2 * 2, y:5*2, z: 1};
-        const Geometry = new THREE.BoxGeometry();
-        const Material = new THREE.MeshPhongMaterial({color: 0x878787});
-        const Wall = new THREE.Mesh(Geometry, Material);
+        const X = 4;
+        const Y = 10;
+        const Z = 4;
+        const depth = 0.5;
 
-        Wall.position.set(position.x, position.y, position.z);
-        Wall.scale.set(scale.x, scale.y, scale.z);
-        Wall.receiveShadow = true;
-        this._scene.add(Wall)
+        const positionArr = [
+            {x:0, y:0, z:-Z-depth/2},
+            {x:0, y:0, z: depth/2},
+            {x:0, y:Y/2+depth/2, z:-Z/2},
+            {x:0, y:-Y/2-depth/2, z:-Z/2},
+            {x:X/2+depth/2, y:0, z:-Z/2},
+            {x:-X/2-depth/2, y:0, z:-Z/2}];
+        const scaleArr = [
+            {x:X, y:Y, z:depth},
+            {x:X, y:Y, z:depth},
+            {x:X, y:depth, z:Z},
+            {x:X, y:depth, z:Z},
+            {x:depth, y:Y, z:Z},
+            {x:depth, y:Y, z:Z},];
+        const wallArr = []
+        for(let i = 0;i<6;i++){
+            const Geometry = new THREE.BoxGeometry();
+            const Material = new THREE.MeshPhongMaterial({color: 0x878787});
+            const Wall = new THREE.Mesh(Geometry, Material);
+    
+            Wall.position.set(positionArr[i].x, positionArr[i].y, positionArr[i].z);
+            Wall.scale.set(scaleArr[i].x, scaleArr[i].y, scaleArr[i].z);
+            Wall.receiveShadow = true;
+            if(i !== 1){
+                this._scene.add(Wall)    
+            }
 
-        const transform = new Ammo.btTransform();
-        const quaternion = {x: 0, y: 0, z: 0, w: 1};
-        transform.setIdentity();
-        transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
-        transform.setRotation(
-            new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
-        const motionState = new Ammo.btDefaultMotionState(transform);
-        const colShape = new Ammo.btBoxShape(
-            new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
+            wallArr.push(Wall);
+            
+            const transform = new Ammo.btTransform();
+            const quaternion = {x: 0, y: 0, z: 0, w: 1};
+            transform.setIdentity();
+            transform.setOrigin(new Ammo.btVector3(positionArr[i].x, positionArr[i].y, positionArr[i].z));
+            transform.setRotation(
+                new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
+            const motionState = new Ammo.btDefaultMotionState(transform);
+            const colShape = new Ammo.btBoxShape(
+                new Ammo.btVector3(scaleArr[i].x * 0.5, scaleArr[i].y * 0.5, scaleArr[i].z * 0.5));
 
-        const mass = 0;
-        colShape.calculateLocalInertia(mass);
-        const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape);
-        const body = new Ammo.btRigidBody(rbInfo);
-        this._physicsWorld.addRigidBody(body)
+            const mass = 0;
+            colShape.calculateLocalInertia(mass);
+            const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape);
+            const body = new Ammo.btRigidBody(rbInfo);
+            this._physicsWorld.addRigidBody(body)
+        }
+        
 
     }
     _createObj(){
+        const pos = {x: 0, y: 0, z: -2};
+        const radius = 0.25;
+        const quat = {x: 0, y: 0, z: 0, w:1};
+        const mass = 1;
 
+        const ball = new THREE.Mesh(
+            new THREE.SphereGeometry(radius),
+            new THREE.MeshStandardMaterial({color: 0xff0000, metalness: 0.7, roughness: 0.4})
+        )
+        ball.position.set(pos.x, pos.y, pos.z);
+        ball.castShadow = true;
+        ball.receiveShadow = true;
+        this._scene.add(ball);
+
+        const transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin( new Ammo.btVector3( pos.x, pos.y, pos.z ) );
+        transform.setRotation( new Ammo.btQuaternion( quat.x, quat.y, quat.z, quat.w ) );
+        const motionState = new Ammo.btDefaultMotionState( transform );
+        const colShape = new Ammo.btSphereShape( radius );
+        colShape.calculateLocalInertia( mass);
+
+        const rbInfo = new Ammo.btRigidBodyConstructionInfo( mass, motionState, colShape);
+        const body = new Ammo.btRigidBody( rbInfo );
+
+        this._physicsWorld.addRigidBody( body );
+        
+        ball.physicsBody = body;  
     }
 
 
@@ -89,7 +141,7 @@ class App {
 		const width = this._divContainer.clientWidth;
 		const height = this._divContainer.clientHeight;
 		const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 100);
-		camera.position.set(0,0,0)
+		camera.position.set(0,0,5)
         camera.lookAt(0,0,0)
 		this._camera = camera;
 	}
@@ -101,7 +153,7 @@ class App {
 		const color = 0xffffff;
 		const intensity = 0.9;
 		const light = new THREE.DirectionalLight(color, intensity);
-		light.position.set(10, 10, 10);
+		light.position.set(10, 3, 3);
 		this._scene.add(light);
 
         light.castShadow = true;
