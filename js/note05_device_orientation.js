@@ -100,40 +100,47 @@ class App {
             colShape.calculateLocalInertia(mass);
             const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape);
             const body = new Ammo.btRigidBody(rbInfo);
+            body.setFriction(0.1)
+            body.setRestitution(0.6)
             this._physicsWorld.addRigidBody(body)
         }
         
 
     }
     _createObj(){
-        const pos = {x: 0, y: 0, z: -2};
-        const radius = 0.25;
-        const quat = {x: 0, y: 0, z: 0, w:1};
-        const mass = 1;
-
-        const ball = new THREE.Mesh(
-            new THREE.SphereGeometry(radius),
-            new THREE.MeshStandardMaterial({color: 0xff0000, metalness: 0.7, roughness: 0.4})
-        )
-        ball.position.set(pos.x, pos.y, pos.z);
-        ball.castShadow = true;
-        ball.receiveShadow = true;
-        this._scene.add(ball);
-
-        const transform = new Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin( new Ammo.btVector3( pos.x, pos.y, pos.z ) );
-        transform.setRotation( new Ammo.btQuaternion( quat.x, quat.y, quat.z, quat.w ) );
-        const motionState = new Ammo.btDefaultMotionState( transform );
-        const colShape = new Ammo.btSphereShape( radius );
-        colShape.calculateLocalInertia( mass);
-
-        const rbInfo = new Ammo.btRigidBodyConstructionInfo( mass, motionState, colShape);
-        const body = new Ammo.btRigidBody( rbInfo );
-
-        this._physicsWorld.addRigidBody( body );
-        
-        ball.physicsBody = body;  
+        for(let i = 0; i<10; i++){
+            const pos = {x: 0, y: 0, z: -2};
+            const radius = 0.25;
+            const quat = {x: 0, y: 0, z: 0, w:1};
+            const mass = 1;
+    
+            const ball = new THREE.Mesh(
+                new THREE.SphereGeometry(radius),
+                new THREE.MeshStandardMaterial({color: 0xff0000, metalness: 0.7, roughness: 0.4})
+            )
+            ball.position.set(pos.x, pos.y, pos.z);
+            ball.castShadow = true;
+            ball.receiveShadow = true;
+            this._scene.add(ball);
+    
+            const transform = new Ammo.btTransform();
+            transform.setIdentity();
+            transform.setOrigin( new Ammo.btVector3( pos.x, pos.y, pos.z ) );
+            transform.setRotation( new Ammo.btQuaternion( quat.x, quat.y, quat.z, quat.w ) );
+            const motionState = new Ammo.btDefaultMotionState( transform );
+            const colShape = new Ammo.btSphereShape( radius );
+            colShape.calculateLocalInertia( mass);
+    
+            const rbInfo = new Ammo.btRigidBodyConstructionInfo( mass, motionState, colShape);
+            const body = new Ammo.btRigidBody( rbInfo );
+    
+            this._physicsWorld.addRigidBody( body );
+            
+            ball.physicsBody = body;  
+            body.setFriction(0.1)
+            body.setRestitution(0.6)
+            console.log(body)
+        }
     }
 
 
