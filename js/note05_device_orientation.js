@@ -23,7 +23,7 @@ class App {
 		this._setupCamera();
 		this._setupLight();
         this._setupAmmo();
-        // this._setupOrientationControls();
+        this._setupOrientationControls();
 
 		window.onresize = this.resize.bind(this);
 		this.resize();
@@ -35,9 +35,9 @@ class App {
     _setupOrientationControls(){
         window.addEventListener('deviceorientation', evt=>{
             
-            // if( ! (evt.alpha && evt.beta && evt.gamma)){
-            //     return;
-            // }
+            if( ! (evt.alpha && evt.beta && evt.gamma)){
+                return;
+            }
             const alpha = THREE.MathUtils.degToRad(evt.alpha);
             const beta = THREE.MathUtils.degToRad(evt.beta);
             const gamma = THREE.MathUtils.degToRad(evt.gamma);
