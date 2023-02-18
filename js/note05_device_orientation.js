@@ -32,6 +32,9 @@ class App {
         
 	}
 
+    round(num){
+        return Math.round(num * 1000) / 1000;
+    }
     _setupOrientationControls(){
         console.log(this._physicsWorld.getGravity())
         window.addEventListener('deviceorientation', evt=>{
@@ -43,12 +46,12 @@ class App {
             const beta = THREE.MathUtils.degToRad(evt.beta);
             const gamma = THREE.MathUtils.degToRad(evt.gamma);
             
-            document.querySelector("#debug").innerText = `alpha : ${Math.round(alpha * 1000) / 1000}\nbeta : ${Math.round(beta * 1000) / 1000}\ngamma : ${Math.round(gamma * 1000) / 1000}`
+            document.querySelector("#debug").innerText = `alpha : ${round(alpha)}\nbeta : ${round(beta)}\ngamma : ${round(gamma)}`
             this._physicsWorld.setGravity(new Ammo.btVector3(
                 Math.cos(beta) * Math.sin(gamma) * 9,
                 -Math.sin(beta) * 9,
                 -Math.cos(beta) * Math.cos(gamma)) * 9); 
-                document.querySelector("#debug").innerText = `${this._physicsWorld.getGravity().x(), this._physicsWorld.getGravity().y(), this._physicsWorld.getGravity().z()}`;
+                document.querySelector("#debug").innerText = `${round(this._physicsWorld.getGravity().x())}, ${round(this._physicsWorld.getGravity().y())}, ${round(this._physicsWorld.getGravity().z())}`;
         }, false);
     }
     _setupAmmo(){
