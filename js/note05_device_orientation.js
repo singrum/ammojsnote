@@ -45,12 +45,14 @@ class App {
                 const alpha = THREE.MathUtils.degToRad(evt.alpha);
                 const beta = THREE.MathUtils.degToRad(evt.beta);
                 const gamma = THREE.MathUtils.degToRad(evt.gamma);
-                
+                alert(1);
                 document.querySelector("#debug").innerText = `alpha : ${round(alpha)}\nbeta : ${round(beta)}\ngamma : ${round(gamma)}`
+                alert(2);
                 this._physicsWorld.setGravity(new Ammo.btVector3(
                     Math.cos(beta) * Math.sin(gamma) * 9,
                     -Math.sin(beta) * 9,
                     -Math.cos(beta) * Math.cos(gamma)) * 9); 
+                alert(3);
                 document.querySelector("#debug").innerText = `${this.round(this._physicsWorld.getGravity().x())}, ${this.round(this._physicsWorld.getGravity().y())}, ${this.round(this._physicsWorld.getGravity().z())}`;
             }, false);
           } catch (e) {
