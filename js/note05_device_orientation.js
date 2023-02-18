@@ -42,7 +42,7 @@ class App {
             const beta = THREE.MathUtils.degToRad(evt.beta);
             const gamma = THREE.MathUtils.degToRad(evt.gamma);
             
-            document.querySelector("#debug").innerText = `alpha : ${Math.round(alpha,4)}, beta : ${Math.round(beta,4)}, gamma : ${Math.round(gamma,4)}`
+            document.querySelector("#debug").innerText = `alpha : ${Math.round(alpha * 1000) / 1000}, beta : ${Math.round(beta * 1000) / 1000}, gamma : ${Math.round(gamma * 1000) / 1000}`
             this._physicsWorld.setGravity(new Ammo.btVector3(
                 Math.cos(beta) * Math.sin(gamma) * 9,
                 -Math.sin(beta) * 9,
