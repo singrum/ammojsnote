@@ -50,7 +50,7 @@ class App {
                 Math.cos(beta) * Math.sin(gamma) * 9,
                 -Math.sin(beta) * 9,
                 -Math.cos(beta) * Math.cos(gamma)) * 9); 
-            document.querySelector("#debug").innerText = `${this.round(this._physicsWorld.getGravity().x())}\n${this.round(this._physicsWorld.getGravity().y())}\n${this.round(this._physicsWorld.getGravity().z())}`;
+            // document.querySelector("#debug").innerText = `${this.round(this._physicsWorld.getGravity().x())}\n${this.round(this._physicsWorld.getGravity().y())}\n${this.round(this._physicsWorld.getGravity().z())}`;
         });
         
     }
