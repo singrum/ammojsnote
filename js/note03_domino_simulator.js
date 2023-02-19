@@ -45,6 +45,7 @@ class App {
     _setupBackButton(){
         const backButton = document.querySelector("#back")
         backButton.addEventListener('click', evt => {
+
             if(this._dominoStack.length === 1){
                 this._firstDomino = null;
             }
@@ -53,7 +54,7 @@ class App {
             this._scene.remove(domino)
             console.log(this._physicsWorld)
             this._physicsWorld.removeRigidBody(domino.physicsBody)
-        })
+        }, false)
     }
 
 
@@ -140,12 +141,12 @@ class App {
         if(object.faceIndex === 8 || object.faceIndex === 9){
             
             object.object.physicsBody.applyTorque(new Ammo.btVector3(-(vertex0_world.x - vertex5_world.x)*20,-(vertex0_world.y - vertex5_world.y)*20,-(vertex0_world.z - vertex5_world.z)*20))
-            // object.object.physicsBody.applyForce(new Ammo.btVector3((vertex1_world.x - vertex0_world.x)*40,(vertex1_world.y - vertex0_world.y)*40,(vertex1_world.z - vertex0_world.z)*40))
+            object.object.physicsBody.applyForce(new Ammo.btVector3((vertex1_world.x - vertex0_world.x)*20,(vertex1_world.y - vertex0_world.y)*20,(vertex1_world.z - vertex0_world.z)*20), new Ammo.btVector3(0,0,0))
             
         }
         if(object.faceIndex === 10 || object.faceIndex === 11){
             object.object.physicsBody.applyTorque(new Ammo.btVector3((vertex0_world.x - vertex5_world.x)*20,(vertex0_world.y - vertex5_world.y)*20,(vertex0_world.z - vertex5_world.z)*20))
-            // object.object.physicsBody.applyForce(new Ammo.btVector3(-(vertex1_world.x - vertex0_world.x)*40,-(vertex1_world.y - vertex0_world.y)*40,-(vertex1_world.z - vertex0_world.z)*40))
+            object.object.physicsBody.applyForce(new Ammo.btVector3(-(vertex1_world.x - vertex0_world.x)*20,-(vertex1_world.y - vertex0_world.y)*20,-(vertex1_world.z - vertex0_world.z)*20), new Ammo.btVector3(0,0,0))
         }
         
     }
