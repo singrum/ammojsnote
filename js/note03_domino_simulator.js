@@ -371,7 +371,7 @@ class App {
         if(this._physicsWorld){
             this._physicsWorld.stepSimulation(deltaTime);
             
-            if( this._firstDomino && this._firstDomino.physicsBody.isActive()) this._firstDomino.physicsBody.activate();
+            if( this._firstDomino && ! this._firstDomino.physicsBody.isActive()) this._firstDomino.physicsBody.activate();
             this._scene.traverse(obj3d => {
                 if(obj3d instanceof THREE.Mesh){
                     const objThree = obj3d;
