@@ -36,25 +36,22 @@ class App {
         return Math.round(num * 1000) / 1000;
     }
     _setupOrientationControls(){
-        try {
-            window.addEventListener('deviceorientation', evt=>{
-            
-                if( ! (evt.alpha && evt.beta && evt.gamma)){
-                    return;
-                }
-                const alpha = THREE.MathUtils.degToRad(evt.alpha);
-                const beta = THREE.MathUtils.degToRad(evt.beta);
-                const gamma = THREE.MathUtils.degToRad(evt.gamma);
-                document.querySelector("#debug").innerText = `alpha : ${this.round(alpha)}\nbeta : ${this.round(beta)}\ngamma : ${this.round(gamma)}`
-                this._physicsWorld.setGravity(new Ammo.btVector3(
-                    Math.cos(beta) * Math.sin(gamma) * 9,
-                    -Math.sin(beta) * 9,
-                    -Math.cos(beta) * Math.cos(gamma)) * 9); 
-                document.querySelector("#debug").innerText = `${this.round(this._physicsWorld.getGravity().x())}\n${this.round(this._physicsWorld.getGravity().y())}\n${this.round(this._physicsWorld.getGravity().z())}`;
-            }, false);
-          } catch (e) {
-            alert(e.name + ": " + e.message);
-          }
+        console.log(THREE.MathUtils.degToRad(180))
+        window.addEventListener('deviceorientation', evt=>{
+        
+            if( ! (evt.alpha && evt.beta && evt.gamma)){
+                return;
+            }
+            const alpha = THREE.MathUtils.degToRad(evt.alpha);
+            const beta = THREE.MathUtils.degToRad(evt.beta);
+            const gamma = THREE.MathUtils.degToRad(evt.gamma);
+            document.querySelector("#debug").innerText = `alpha : ${this.round(alpha)}\nbeta : ${this.round(beta)}\ngamma : ${this.round(gamma)}`
+            this._physicsWorld.setGravity(new Ammo.btVector3(
+                Math.cos(beta) * Math.sin(gamma) * 9,
+                -Math.sin(beta) * 9,
+                -Math.cos(beta) * Math.cos(gamma)) * 9); 
+            document.querySelector("#debug").innerText = `${this.round(this._physicsWorld.getGravity().x())}\n${this.round(this._physicsWorld.getGravity().y())}\n${this.round(this._physicsWorld.getGravity().z())}`;
+        });
         
     }
     _setupAmmo(){
