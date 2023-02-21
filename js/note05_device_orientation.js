@@ -150,7 +150,7 @@ class App {
         for(let i = 0; i<14; i++){
             const pos = {x: this.rangeRandom(-this.X/2 + radius, this.X/2 - radius), y:this.rangeRandom(-this.Y/2 + radius, this.Y/2 - radius), z:this.rangeRandom(-this.Z + radius, - radius)};
             const quat = {x: 0, y: 0, z: 0, w:1};
-            const mass = 0.5;
+            const mass = 0.2;
     
             const ball = new THREE.Mesh(
                 new THREE.SphereGeometry(radius),
