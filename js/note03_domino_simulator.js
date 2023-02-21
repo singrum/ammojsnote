@@ -28,10 +28,12 @@ class App {
         this._firstDomino = null;
         this._dominoStack = [];
         this._isDrawOn = false;
+        this.color = Math.floor(Math.random() * 0xffffff);
 
 
 		this._setupCamera();
 		this._setupLight();
+        this._setupBackground();
         this._setupAmmo();
 		this._setupControls();
         this._setupBackButton();
@@ -43,11 +45,14 @@ class App {
 		requestAnimationFrame(this.render.bind(this));
 	}
 
+    _setupBackground(){
+        this._scene.background = new THREE.Color(0x222222)
+    }
 
     _setupDrawButton(){
         this.thredhold = 10;
 
-        const distance = (point1, point2)=>Math.hypot(point1[0] - point2[0], point1[1] - point2[1]);
+        // const distance = (point1, point2)=>Math.hypot(point1[0] - point2[0], point1[1] - point2[1]);
         const screenToPlane = point /**arr.x,y 형식 */=>{
             const raycaster = new THREE.Raycaster();
             
@@ -107,7 +112,8 @@ class App {
             
             if(this._firstDomino){
                 
-                const interObj = raycaster.intersectObjects([this._firstDomino])
+                const interObj = raycaster.intersectObjects(this._dominoStack)
+                console.log(interObj)
                 if(interObj[0]){
                     this.pull(interObj[0]);
                 }
@@ -153,78 +159,7 @@ class App {
     }
 
 
-    // _setupDominoMaker(){
-    //     const raycaster = new THREE.Raycaster();
 
-    //     // click event
-    //     window.addEventListener("click", event =>{
-    //         if(!event.ctrlKey) return;
-    //         const width = this._divContainer.clientWidth;
-    //         const height = this._divContainer.clientHeight;
-    //         const pt = {
-    //             x: (event.clientX / width) * 2 - 1,
-    //             y: - (event.clientY / height) * 2 + 1
-    //         }
-    //         raycaster.setFromCamera(pt, this._camera);
-    //         const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
-            
-    //         this.makeDomino(clickedPoint)
-    //     })
-        
-        
-    //     // touch event
-    //     this.touchStartPos = null;
-    //     this.isMoved = false
-        
-    //     window.addEventListener("touchstart", evt =>{
-    //         this.touchStartPos = [evt.touches[0].clientX, evt.touches[0].clientY];
-    //     })
-    //     window.addEventListener("touchmove", evt =>{
-    //         this.isMoved = true;
-    //     })
-    //     window.addEventListener("touchend", evt =>{
-            
-    //         if(!this.isMoved){
-    //             const width = this._divContainer.clientWidth;
-    //             const height = this._divContainer.clientHeight;
-    //             const pt = {
-    //                 x: (this.touchStartPos[0] / width) * 2 - 1,
-    //                 y: - (this.touchStartPos[1] / height) * 2 + 1
-    //             }
-    //             raycaster.setFromCamera(pt, this._camera);
-
-    //             if(this._firstDomino){
-    //                 const interObj = raycaster.intersectObjects([this._firstDomino,this._plane])
-    //                 if(interObj[0]){
-    //                     if (interObj[0].object === this._firstDomino){
-                        
-    //                         this.pull(interObj[0]);
-    //                     }
-    //                     else{
-    //                         this.makeDomino(interObj[0].point);
-    //                     }
-    //                 }
-
-                    
-    //             }
-    //             else{
-    //                 const interObj = raycaster.intersectObjects([this._plane]);
-    //                 if(interObj[0]){
-    //                     this._firstDomino = this.makeDomino(interObj[0].point)
-    //                 }
-        
-                    
-                    
-    //             }
-
-    //         }
-
-    //         this.isMoved = false;
-            
-            
-    //     })
-
-// }
     pull(object){
         
 
@@ -267,9 +202,11 @@ class App {
     }
 
     putDomino(pos, look){
+        if(this.color === 0xffffff) this.color = 0x000000
+        this.color +=100;
         const scale = {x: 0.75, y: 1, z: 0.1};
         const dominoGeometry = new THREE.BoxGeometry();
-        const dominoMaterial = new THREE.MeshPhysicalMaterial({color : this._firstDomino ? 0xb3e3ff : 0xffff00}); 
+        const dominoMaterial = new THREE.MeshPhysicalMaterial({color : Math.random() * 0xffffff, roughness : 1, }); 
  
         
         const domino = new THREE.Mesh(dominoGeometry, dominoMaterial);
@@ -310,55 +247,6 @@ class App {
         return domino
 
     }
-    // makeDomino(pos){
-        
-    //     const scale = {x: 0.75, y: 1, z: 0.1};
-    //     const dominoGeometry = new THREE.BoxGeometry();
-    //     const dominoMaterial = new THREE.MeshPhysicalMaterial({color : this._firstDomino ? 0xb3e3ff : 0xffff00}); 
- 
-        
-    //     const domino = new THREE.Mesh(dominoGeometry, dominoMaterial);
-    //     if(!this._firstDomino) {
-    //         this._firstDomino = domino
-    //     }             
-    //     this._dominoStack.push(domino)
-        
-
-
-
-    //     const mass = 1;
-        
-    //     domino.scale.set(scale.x, scale.y, scale.z);
-    //     domino.position.set(pos.x, scale.y / 2, pos.z)
-    //     domino.lookAt(this._camera.position.x, scale.y / 2, this._camera.position.z);
- 
-        
-    //     domino.castShadow = true;
-    //     domino.receiveShadow = true;
-    //     this._scene.add(domino)
-
-    //     const quaternion = new THREE.Quaternion();
-    //     quaternion.setFromEuler(domino.rotation)
-
-    //     const transform = new Ammo.btTransform();
-    //     transform.setIdentity();
-    //     transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
-    //     transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
-    //     const motionState = new Ammo.btDefaultMotionState(transform);
-    //     const colShape = new Ammo.btBoxShape(new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
-
-    //     const localInertia = new Ammo.btVector3(0,0,0);
-    //     colShape.calculateLocalInertia(mass, localInertia);
-
-    //     const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
-    //     const body = new Ammo.btRigidBody(rbInfo);
-    //     this._physicsWorld.addRigidBody(body);
-
-    //     domino.physicsBody = body;
-        
-    //     return domino
-        
-    // }
 
     _setupAmmo(){
         Ammo().then(() => {
@@ -392,7 +280,7 @@ class App {
         this._plane = plane
 
         const tableGeometry = new THREE.BoxGeometry();
-        const tableMaterial = new THREE.MeshPhongMaterial({color: 0x878787});
+        const tableMaterial = new THREE.MeshPhongMaterial({color: 0xaaaaaa});
         const table = new THREE.Mesh(tableGeometry, tableMaterial);
         
         
@@ -420,48 +308,7 @@ class App {
         body.setFriction(0.8);
 
     }
-
-    _createDomino(){
-        const scale = {x: 0.75, y: 1, z: 0.1};
-        const pos ={x: 0, y: scale.y / 2 + this._table.scale.y / 2, z: 0};
-        
-        const dominoGeometry = new THREE.BoxGeometry();
-        const dominoMaterial = new THREE.MeshPhysicalMaterial();
-        const domino = new THREE.Mesh(dominoGeometry, dominoMaterial);
-
-
-        const mass = 1;
-        
-        domino.scale.set(scale.x, scale.y, scale.z);
-        domino.position.set(pos.x, pos.y, pos.z);
-        domino.lookAt(1,pos.y,0);
-
-        
-        domino.castShadow = true;
-        domino.receiveShadow = true;
-        this._scene.add(domino)
-
-        const quaternion = new THREE.Quaternion();
-        quaternion.setFromEuler(domino.rotation)
-
-        const transform = new Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
-        transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
-        const motionState = new Ammo.btDefaultMotionState(transform);
-        const colShape = new Ammo.btBoxShape(new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
-
-        const localInertia = new Ammo.btVector3(0,0,0);
-        colShape.calculateLocalInertia(mass, localInertia);
-
-        const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
-        const body = new Ammo.btRigidBody(rbInfo);
-        this._physicsWorld.addRigidBody(body);
-
-        domino.physicsBody = body;
-
-    }
-
+    
 	_setupCamera() {
 		const width = this._divContainer.clientWidth;
 		const height = this._divContainer.clientHeight;
@@ -488,7 +335,6 @@ class App {
 
 	_setupModel() {
 		this._createTable()
-        // this._createDomino()
 	}
 
 	resize() {
@@ -515,12 +361,14 @@ class App {
         if(this._physicsWorld){
             this._physicsWorld.stepSimulation(deltaTime);
             
-            if( this._firstDomino && ! this._firstDomino.physicsBody.isActive()) this._firstDomino.physicsBody.activate();
+            // if( this._firstDomino && ! this._firstDomino.physicsBody.isActive()) this._firstDomino.physicsBody.activate();
             this._scene.traverse(obj3d => {
                 if(obj3d instanceof THREE.Mesh){
+                    
                     const objThree = obj3d;
                     const objAmmo = objThree.physicsBody;
                     if(objAmmo){
+                        if(!objAmmo.isActive()) objAmmo.activate();
                         const motionState = objAmmo.getMotionState();
                         if(motionState){
                             let tmpTrans = this._tmpTrans;
