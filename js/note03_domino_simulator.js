@@ -306,7 +306,7 @@ class App {
         this._physicsWorld.addRigidBody(body);
 
         domino.physicsBody = body;
-        
+        body.setFriction(0.8);
         return domino
 
     }
@@ -417,6 +417,7 @@ class App {
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape);
         const body = new Ammo.btRigidBody(rbInfo);
         this._physicsWorld.addRigidBody(body)
+        body.setFriction(0.8);
 
     }
 
