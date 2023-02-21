@@ -16,10 +16,13 @@ body {
 }
 
 #back{
-    position: absolute;
     top:0;
     right:0;
-    color:#ffffff
+    
+}
+#draw{
+    top:0;
+    right : 40px;
 }
 
 
@@ -30,3 +33,15 @@ body {
     color: white
 }
 
+.btn{
+    position: absolute;
+    background-color: rgba(256,256,256,0.5);
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    border : solid 1px white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color:#000000;
+}

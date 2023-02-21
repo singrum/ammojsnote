@@ -6,8 +6,14 @@ import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitCo
 
 class App {
 	constructor() {
+        const drawButton = document.querySelector("#draw");
+        this._drawButton = drawButton;
+        const backButton = document.querySelector("#back")
+        this._backButton = backButton;
+
 		const divContainer = document.querySelector("#webgl_container");
 		this._divContainer = divContainer;
+        
 
 		const renderer = new THREE.WebGLRenderer({ antialias: true });
 		
@@ -18,33 +24,122 @@ class App {
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		const scene = new THREE.Scene();
 		this._scene = scene;
-
         this._clock = new THREE.Clock();
-
         this._firstDomino = null;
-
-        
         this._dominoStack = [];
+        this._isDrawOn = false;
+
 
 		this._setupCamera();
-        this._setupBackground();
 		this._setupLight();
         this._setupAmmo();
 		this._setupControls();
-        this._setupDominoMaker();
         this._setupBackButton();
+        this._setupDrawButton();
 
 		window.onresize = this.resize.bind(this);
 		this.resize();
 
 		requestAnimationFrame(this.render.bind(this));
 	}
-    _setupBackground(){
-        
+
+
+    _setupDrawButton(){
+        this.thredhold = 10;
+
+        const distance = (point1, point2)=>Math.hypot(point1[0] - point2[0], point1[1] - point2[1]);
+        const screenToPlane = point /**arr.x,y 형식 */=>{
+            const raycaster = new THREE.Raycaster();
+            
+            const pt = {
+                x: (point[0] / this._divContainer.clientWidth) * 2 - 1,
+                y: - (point[1] / this._divContainer.clientHeight) * 2 + 1
+            }
+            raycaster.setFromCamera(pt, this._camera)
+            const interObj = raycaster.intersectObjects([this._plane])
+            if(interObj.length === 0){
+                return;
+            }
+            return [interObj[0].point.x, interObj[0].point.z]
+        }
+
+        const touchstartEvent = evt=>{
+            this.prevPoint = null;
+            this.currPoint = screenToPlane([evt.touches[0].clientX, evt.touches[0].clientY]);
+            if(! this.currPoint) return;
+            this.distance = 0;
+            this.counter = 5;
+            this.makeFlag = false;
+        }
+
+        const touchmoveEvent = evt=>{
+            if(! this.currPoint) return;
+            this.counter ++;
+            if(this.counter !== 10){
+                return;
+            }
+            this.counter = 0;
+            
+            if (this.makeFlag){
+                this.putDomino(this.prevPoint, this.currPoint)
+                this.distance = 0;
+            }
+            if(! this.prev){
+                this.makeFlag = true;
+            }
+            if(this.distance > this.thredhold){
+                this.makeFlag = true;
+            }
+            this.prevPoint = this.currPoint;
+            this.currPoint = screenToPlane([evt.touches[0].clientX, evt.touches[0].clientY])
+            if(! this.currPoint) return;
+        }
+
+        const pulldown = evt=>{
+            const raycaster = new THREE.Raycaster();
+            const width = this._divContainer.clientWidth;
+            const height = this._divContainer.clientHeight;
+            const pt = {
+                x: (evt.touches[0].clientX / width) * 2 - 1,
+                y: - (evt.touches[0].clientY / height) * 2 + 1
+            }
+            raycaster.setFromCamera(pt, this._camera);
+            
+            if(this._firstDomino){
+                
+                const interObj = raycaster.intersectObjects([this._firstDomino])
+                if(interObj[0]){
+                    this.pull(interObj[0]);
+                }
+
+                
+            }
+        }
+        window.addEventListener("touchstart", pulldown);
+
+        this._drawButton.addEventListener("click",()=>{
+            if(!this._isDrawOn){
+                this._drawButton.style.backgroundColor = "white";
+                this._controls.enabled = false
+                window.addEventListener("touchstart", touchstartEvent);
+                window.addEventListener("touchmove", touchmoveEvent);
+                window.removeEventListener("touchstart", pulldown);
+
+            }
+            else{
+                this._drawButton.style.backgroundColor = "rgba(256,256,256,0.5)";
+                this._controls.enabled = true;
+                window.removeEventListener("touchstart", touchstartEvent)
+                window.removeEventListener("touchstart", touchmoveEvent)
+                window.addEventListener("touchstart", pulldown);
+            }
+            this._isDrawOn = !this._isDrawOn
+        })
     }
+
+
     _setupBackButton(){
-        const backButton = document.querySelector("#back")
-        backButton.addEventListener('click', evt => {
+        this._backButton.addEventListener('click', evt => {
 
             if(this._dominoStack.length === 1){
                 this._firstDomino = null;
@@ -58,76 +153,78 @@ class App {
     }
 
 
-    _setupDominoMaker(){
-        const raycaster = new THREE.Raycaster();
+    // _setupDominoMaker(){
+    //     const raycaster = new THREE.Raycaster();
 
-        // click event
-        window.addEventListener("click", event =>{
-            if(!event.ctrlKey) return;
-            const width = this._divContainer.clientWidth;
-            const height = this._divContainer.clientHeight;
-            const pt = {
-                x: (event.clientX / width) * 2 - 1,
-                y: - (event.clientY / height) * 2 + 1
-            }
-            raycaster.setFromCamera(pt, this._camera);
-            const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
-            this.makeDomino(clickedPoint)
-        })
-        
-        
-        // touch event
-        this.touchStartPos = null;
-        this.isMoved = false
-        
-        window.addEventListener("touchstart", evt =>{
-            this.touchStartPos = [evt.touches[0].clientX, evt.touches[0].clientY];
-        })
-        window.addEventListener("touchmove", evt =>{
-            this.isMoved = true;
-        })
-        window.addEventListener("touchend", evt =>{
+    //     // click event
+    //     window.addEventListener("click", event =>{
+    //         if(!event.ctrlKey) return;
+    //         const width = this._divContainer.clientWidth;
+    //         const height = this._divContainer.clientHeight;
+    //         const pt = {
+    //             x: (event.clientX / width) * 2 - 1,
+    //             y: - (event.clientY / height) * 2 + 1
+    //         }
+    //         raycaster.setFromCamera(pt, this._camera);
+    //         const clickedPoint = raycaster.intersectObjects([this._plane])[0].point;
             
-            if(!this.isMoved){
-                const width = this._divContainer.clientWidth;
-                const height = this._divContainer.clientHeight;
-                const pt = {
-                    x: (this.touchStartPos[0] / width) * 2 - 1,
-                    y: - (this.touchStartPos[1] / height) * 2 + 1
-                }
-                raycaster.setFromCamera(pt, this._camera);
+    //         this.makeDomino(clickedPoint)
+    //     })
+        
+        
+    //     // touch event
+    //     this.touchStartPos = null;
+    //     this.isMoved = false
+        
+    //     window.addEventListener("touchstart", evt =>{
+    //         this.touchStartPos = [evt.touches[0].clientX, evt.touches[0].clientY];
+    //     })
+    //     window.addEventListener("touchmove", evt =>{
+    //         this.isMoved = true;
+    //     })
+    //     window.addEventListener("touchend", evt =>{
+            
+    //         if(!this.isMoved){
+    //             const width = this._divContainer.clientWidth;
+    //             const height = this._divContainer.clientHeight;
+    //             const pt = {
+    //                 x: (this.touchStartPos[0] / width) * 2 - 1,
+    //                 y: - (this.touchStartPos[1] / height) * 2 + 1
+    //             }
+    //             raycaster.setFromCamera(pt, this._camera);
 
-                if(this._firstDomino){
-                    const interObj = raycaster.intersectObjects([this._firstDomino,this._plane])
-                    if(interObj[0]){
-                        if (interObj[0].object === this._firstDomino){
+    //             if(this._firstDomino){
+    //                 const interObj = raycaster.intersectObjects([this._firstDomino,this._plane])
+    //                 if(interObj[0]){
+    //                     if (interObj[0].object === this._firstDomino){
                         
-                            this.pull(interObj[0]);
-                        }
-                        else{
-                            this.makeDomino(interObj[0].point);
-                        }
-                    }
+    //                         this.pull(interObj[0]);
+    //                     }
+    //                     else{
+    //                         this.makeDomino(interObj[0].point);
+    //                     }
+    //                 }
 
                     
-                }
-                else{
-                    const interObj = raycaster.intersectObjects([this._plane]);
-                    if(interObj[0]){
-                        this._firstDomino = this.makeDomino(interObj[0].point)
-                    }
+    //             }
+    //             else{
+    //                 const interObj = raycaster.intersectObjects([this._plane]);
+    //                 if(interObj[0]){
+    //                     this._firstDomino = this.makeDomino(interObj[0].point)
+    //                 }
         
                     
                     
-                }
+    //             }
 
-            }
+    //         }
 
-            this.isMoved = false;
+    //         this.isMoved = false;
             
             
-        })
-    }
+    //     })
+
+// }
     pull(object){
         
 
@@ -140,13 +237,15 @@ class App {
         
         if(object.faceIndex === 8 || object.faceIndex === 9){
             
-            object.object.physicsBody.applyTorque(new Ammo.btVector3(-(vertex0_world.x - vertex5_world.x)*20,-(vertex0_world.y - vertex5_world.y)*20,-(vertex0_world.z - vertex5_world.z)*20))
-            object.object.physicsBody.applyForce(new Ammo.btVector3((vertex1_world.x - vertex0_world.x)*20,(vertex1_world.y - vertex0_world.y)*20,(vertex1_world.z - vertex0_world.z)*20), new Ammo.btVector3(0,0,0))
+            
+            object.object.physicsBody.setAngularVelocity(new Ammo.btVector3(-(vertex0_world.x - vertex5_world.x)*10,-(vertex0_world.y - vertex5_world.y)*10,-(vertex0_world.z - vertex5_world.z)*10))
+            object.object.physicsBody.setLinearVelocity(new Ammo.btVector3((vertex1_world.x - vertex0_world.x)*20,(vertex1_world.y - vertex0_world.y)*20,(vertex1_world.z - vertex0_world.z)*20))
             
         }
         if(object.faceIndex === 10 || object.faceIndex === 11){
-            object.object.physicsBody.applyTorque(new Ammo.btVector3((vertex0_world.x - vertex5_world.x)*20,(vertex0_world.y - vertex5_world.y)*20,(vertex0_world.z - vertex5_world.z)*20))
-            object.object.physicsBody.applyForce(new Ammo.btVector3(-(vertex1_world.x - vertex0_world.x)*20,-(vertex1_world.y - vertex0_world.y)*20,-(vertex1_world.z - vertex0_world.z)*20), new Ammo.btVector3(0,0,0))
+            
+            object.object.physicsBody.setAngularVelocity(new Ammo.btVector3((vertex0_world.x - vertex5_world.x)*10,(vertex0_world.y - vertex5_world.y)*10,(vertex0_world.z - vertex5_world.z)*10))
+            object.object.physicsBody.setLinearVelocity(new Ammo.btVector3(-(vertex1_world.x - vertex0_world.x)*20,-(vertex1_world.y - vertex0_world.y)*20,-(vertex1_world.z - vertex0_world.z)*20))
         }
         
     }
@@ -167,8 +266,7 @@ class App {
             this._scene.add(points)
     }
 
-    makeDomino(pos){
-        
+    putDomino(pos, look){
         const scale = {x: 0.75, y: 1, z: 0.1};
         const dominoGeometry = new THREE.BoxGeometry();
         const dominoMaterial = new THREE.MeshPhysicalMaterial({color : this._firstDomino ? 0xb3e3ff : 0xffff00}); 
@@ -179,15 +277,11 @@ class App {
             this._firstDomino = domino
         }             
         this._dominoStack.push(domino)
-        
-
-
-
         const mass = 1;
         
         domino.scale.set(scale.x, scale.y, scale.z);
-        domino.position.set(pos.x, scale.y / 2, pos.z)
-        domino.lookAt(this._camera.position.x, scale.y / 2, this._camera.position.z);
+        domino.position.set(pos[0], scale.y / 2, pos[1])
+        domino.lookAt(look[0], scale.y / 2, look[1]);
  
         
         domino.castShadow = true;
@@ -199,7 +293,7 @@ class App {
 
         const transform = new Ammo.btTransform();
         transform.setIdentity();
-        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        transform.setOrigin(new Ammo.btVector3(pos[0], scale.y / 2, pos[1]));
         transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
         const motionState = new Ammo.btDefaultMotionState(transform);
         const colShape = new Ammo.btBoxShape(new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
@@ -214,8 +308,57 @@ class App {
         domino.physicsBody = body;
         
         return domino
-        
+
     }
+    // makeDomino(pos){
+        
+    //     const scale = {x: 0.75, y: 1, z: 0.1};
+    //     const dominoGeometry = new THREE.BoxGeometry();
+    //     const dominoMaterial = new THREE.MeshPhysicalMaterial({color : this._firstDomino ? 0xb3e3ff : 0xffff00}); 
+ 
+        
+    //     const domino = new THREE.Mesh(dominoGeometry, dominoMaterial);
+    //     if(!this._firstDomino) {
+    //         this._firstDomino = domino
+    //     }             
+    //     this._dominoStack.push(domino)
+        
+
+
+
+    //     const mass = 1;
+        
+    //     domino.scale.set(scale.x, scale.y, scale.z);
+    //     domino.position.set(pos.x, scale.y / 2, pos.z)
+    //     domino.lookAt(this._camera.position.x, scale.y / 2, this._camera.position.z);
+ 
+        
+    //     domino.castShadow = true;
+    //     domino.receiveShadow = true;
+    //     this._scene.add(domino)
+
+    //     const quaternion = new THREE.Quaternion();
+    //     quaternion.setFromEuler(domino.rotation)
+
+    //     const transform = new Ammo.btTransform();
+    //     transform.setIdentity();
+    //     transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+    //     transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
+    //     const motionState = new Ammo.btDefaultMotionState(transform);
+    //     const colShape = new Ammo.btBoxShape(new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
+
+    //     const localInertia = new Ammo.btVector3(0,0,0);
+    //     colShape.calculateLocalInertia(mass, localInertia);
+
+    //     const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+    //     const body = new Ammo.btRigidBody(rbInfo);
+    //     this._physicsWorld.addRigidBody(body);
+
+    //     domino.physicsBody = body;
+        
+    //     return domino
+        
+    // }
 
     _setupAmmo(){
         Ammo().then(() => {
@@ -234,7 +377,7 @@ class App {
     }
 
 	_setupControls(){
-		new OrbitControls(this._camera, this._divContainer);
+		this._controls = new OrbitControls(this._camera, this._divContainer);
 	}
 
     _createTable(){
