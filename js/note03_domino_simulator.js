@@ -50,9 +50,9 @@ class App {
     }
 
     _setupDrawButton(){
-        this.thredhold = 10;
+        this.thredhold = 0.5;
 
-        // const distance = (point1, point2)=>Math.hypot(point1[0] - point2[0], point1[1] - point2[1]);
+        const distance = (point1, point2)=>Math.hypot(point1[0] - point2[0], point1[1] - point2[1]);
         const screenToPlane = point /**arr.x,y 형식 */=>{
             const raycaster = new THREE.Raycaster();
             
@@ -73,30 +73,37 @@ class App {
             this.currPoint = screenToPlane([evt.touches[0].clientX, evt.touches[0].clientY]);
             if(! this.currPoint) return;
             this.distance = 0;
-            this.counter = 5;
+            // this.counter = 5;
             this.makeFlag = false;
         }
 
         const touchmoveEvent = evt=>{
             if(! this.currPoint) return;
-            this.counter ++;
-            if(this.counter !== 10){
-                return;
-            }
-            this.counter = 0;
+            // this.counter ++;
+            // if(this.counter !== 10){
+            //     return;
+            // }
+            // this.counter = 0;
             
             if (this.makeFlag){
-                this.putDomino(this.prevPoint, this.currPoint)
+                
+                this.putDomino(this.prevDominoPoint, this.currPoint)
                 this.distance = 0;
+                this.makeFlag = false;
             }
-            if(! this.prev){
-                this.makeFlag = true;
+            if(! this.prevPoint){
+                // this.makeFlag = true;
+                this.prevDominoPoint = this.currPoint;
             }
             if(this.distance > this.thredhold){
+                
                 this.makeFlag = true;
+                this.prevDominoPoint = this.currPoint;
             }
             this.prevPoint = this.currPoint;
             this.currPoint = screenToPlane([evt.touches[0].clientX, evt.touches[0].clientY])
+            this.distance = distance(this.prevDominoPoint, this.currPoint)
+            console.log(this.distance)
             if(! this.currPoint) return;
         }
 
