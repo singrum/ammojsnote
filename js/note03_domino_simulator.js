@@ -73,17 +73,11 @@ class App {
             this.currPoint = screenToPlane([evt.touches[0].clientX, evt.touches[0].clientY]);
             if(! this.currPoint) return;
             this.distance = 0;
-            // this.counter = 5;
             this.makeFlag = false;
         }
 
         const touchmoveEvent = evt=>{
             if(! this.currPoint) return;
-            // this.counter ++;
-            // if(this.counter !== 10){
-            //     return;
-            // }
-            // this.counter = 0;
             
             if (this.makeFlag){
                 
@@ -92,7 +86,6 @@ class App {
                 this.makeFlag = false;
             }
             if(! this.prevPoint){
-                // this.makeFlag = true;
                 this.prevDominoPoint = null;
                 this.currDominoPoint = this.currPoint
             }
@@ -369,8 +362,6 @@ class App {
         
         if(this._physicsWorld){
             this._physicsWorld.stepSimulation(deltaTime);
-            
-            // if( this._firstDomino && ! this._firstDomino.physicsBody.isActive()) this._firstDomino.physicsBody.activate();
             this._scene.traverse(obj3d => {
                 if(obj3d instanceof THREE.Mesh){
                     
