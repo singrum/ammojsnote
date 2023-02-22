@@ -87,22 +87,24 @@ class App {
             
             if (this.makeFlag){
                 
-                this.putDomino(this.prevDominoPoint, this.currPoint)
+                this.putDomino(this.prevDominoPoint, this.currDominoPoint)
                 this.distance = 0;
                 this.makeFlag = false;
             }
             if(! this.prevPoint){
                 // this.makeFlag = true;
-                this.prevDominoPoint = this.currPoint;
+                this.prevDominoPoint = null;
+                this.currDominoPoint = this.currPoint
             }
             if(this.distance > this.thredhold){
                 
                 this.makeFlag = true;
-                this.prevDominoPoint = this.currPoint;
+                this.prevDominoPoint = this.currDominoPoint;
+                this.currDominoPoint = this.currPoint;
             }
             this.prevPoint = this.currPoint;
             this.currPoint = screenToPlane([evt.touches[0].clientX, evt.touches[0].clientY])
-            this.distance = distance(this.prevDominoPoint, this.currPoint)
+            this.distance = distance(this.currDominoPoint, this.currPoint)
             
             if(! this.currPoint) return;
         }
