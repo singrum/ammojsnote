@@ -10,6 +10,8 @@ class App {
         this._drawButton = drawButton;
         const backButton = document.querySelector("#back")
         this._backButton = backButton;
+        const dragButton = document.querySelector("#drag");
+        this._dragButton = dragButton;
 
 		const divContainer = document.querySelector("#webgl_container");
 		this._divContainer = divContainer;
@@ -25,7 +27,6 @@ class App {
 		const scene = new THREE.Scene();
 		this._scene = scene;
         this._clock = new THREE.Clock();
-        this._firstDomino = null;
         this._dominoStack = [];
         this._isDrawOn = false;
         this.color = Math.floor(Math.random() * 0xffffff);
@@ -103,6 +104,9 @@ class App {
         }
 
         const pulldown = evt=>{
+            if(this._dominoStack.length === 0){
+                return;
+            }
             const raycaster = new THREE.Raycaster();
             const width = this._divContainer.clientWidth;
             const height = this._divContainer.clientHeight;
@@ -111,53 +115,50 @@ class App {
                 y: - (evt.touches[0].clientY / height) * 2 + 1
             }
             raycaster.setFromCamera(pt, this._camera);
+                
+            const interObj = raycaster.intersectObjects(this._dominoStack)
             
-            if(this._firstDomino){
-                
-                const interObj = raycaster.intersectObjects(this._dominoStack)
-                
-                if(interObj[0]){
-                    this.pull(interObj[0]);
-                }
-
-                
-            }
+            if(interObj[0])this.pull(interObj[0]);
         }
         window.addEventListener("touchstart", pulldown);
 
-        this._drawButton.addEventListener("click",()=>{
+        this._drawButton.addEventListener("touchstart",()=>{
             if(!this._isDrawOn){
                 this._drawButton.style.backgroundColor = "white";
+                this._dragButton.style.backgroundColor = "rgba(256,256,256,0.5)";
                 this._controls.enabled = false
                 window.addEventListener("touchstart", touchstartEvent);
                 window.addEventListener("touchmove", touchmoveEvent);
                 window.removeEventListener("touchstart", pulldown);
-
+                this._isDrawOn = !this._isDrawOn
             }
-            else{
+        })
+        this._dragButton.addEventListener("touchstart", ()=>{
+            if(this._isDrawOn){
                 this._drawButton.style.backgroundColor = "rgba(256,256,256,0.5)";
+                this._dragButton.style.backgroundColor = "white";
                 this._controls.enabled = true;
                 window.removeEventListener("touchstart", touchstartEvent)
-                window.removeEventListener("touchstart", touchmoveEvent)
+                window.removeEventListener("touchmove", touchmoveEvent)
                 window.addEventListener("touchstart", pulldown);
+                this._isDrawOn = !this._isDrawOn
             }
-            this._isDrawOn = !this._isDrawOn
         })
     }
 
 
     _setupBackButton(){
-        this._backButton.addEventListener('click', evt => {
-
-            if(this._dominoStack.length === 1){
-                this._firstDomino = null;
-            }
+        this._backButton.addEventListener('touchstart', evt => {
+            this._backButton.style.backgroundColor = "white";
+            if(this._dominoStack.length === 0) return;
             
             const domino = this._dominoStack.pop()
             this._scene.remove(domino)
-            
             this._physicsWorld.removeRigidBody(domino.physicsBody)
         }, false)
+        this._backButton.addEventListener("touchend", evt=>{
+            this._backButton.style.backgroundColor = "rgba(256,256,256,0.5)"
+        })
     }
 
 
@@ -212,9 +213,6 @@ class App {
  
         
         const domino = new THREE.Mesh(dominoGeometry, dominoMaterial);
-        if(!this._firstDomino) {
-            this._firstDomino = domino
-        }             
         this._dominoStack.push(domino)
         const mass = 1;
         

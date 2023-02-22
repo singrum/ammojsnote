@@ -23,6 +23,17 @@ body {
 #draw{
     top:0;
     right : 40px;
+    background-color: rgba(256,256,256,0.5);
+}
+#drag{
+    top:0;
+    right : 80px;
+    background-color: white;
+}
+#back{
+    top:0;
+    right : 0px;
+    background-color: rgba(256,256,256,0.5);
 }
 
 
@@ -35,7 +46,6 @@ body {
 
 .btn{
     position: absolute;
-    background-color: rgba(256,256,256,0.5);
     width: 40px;
     height: 40px;
     border-radius: 5px;
