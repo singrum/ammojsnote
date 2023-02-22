@@ -120,7 +120,7 @@ class App {
             
             if(interObj[0])this.pull(interObj[0]);
         }
-        window.addEventListener("touchstart", pulldown);
+        
 
         this._drawButton.addEventListener("touchstart",()=>{
             if(!this._isDrawOn){
@@ -138,8 +138,8 @@ class App {
                 this._drawButton.style.backgroundColor = "rgba(256,256,256,0.5)";
                 this._dragButton.style.backgroundColor = "white";
                 this._controls.enabled = true;
-                window.removeEventListener("touchstart", touchstartEvent)
-                window.removeEventListener("touchmove", touchmoveEvent)
+                window.removeEventListener("touchstart", touchstartEvent);
+                window.removeEventListener("touchmove", touchmoveEvent);
                 window.addEventListener("touchstart", pulldown);
                 this._isDrawOn = !this._isDrawOn
             }
