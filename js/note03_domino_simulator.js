@@ -103,7 +103,7 @@ class App {
             this.prevPoint = this.currPoint;
             this.currPoint = screenToPlane([evt.touches[0].clientX, evt.touches[0].clientY])
             this.distance = distance(this.prevDominoPoint, this.currPoint)
-            console.log(this.distance)
+            
             if(! this.currPoint) return;
         }
 
@@ -120,7 +120,7 @@ class App {
             if(this._firstDomino){
                 
                 const interObj = raycaster.intersectObjects(this._dominoStack)
-                console.log(interObj)
+                
                 if(interObj[0]){
                     this.pull(interObj[0]);
                 }
@@ -160,7 +160,7 @@ class App {
             
             const domino = this._dominoStack.pop()
             this._scene.remove(domino)
-            console.log(this._physicsWorld)
+            
             this._physicsWorld.removeRigidBody(domino.physicsBody)
         }, false)
     }
