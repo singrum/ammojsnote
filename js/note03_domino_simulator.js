@@ -173,7 +173,7 @@ class App {
         const vertex0_world = object.object.localToWorld((new THREE.Vector3()).fromBufferAttribute( positionAttribute, 0));
         const vertex1_world = object.object.localToWorld((new THREE.Vector3()).fromBufferAttribute( positionAttribute, 1))
         const vertex5_world = object.object.localToWorld((new THREE.Vector3()).fromBufferAttribute( positionAttribute, 5));
-        
+        object.object.physicsBody.activate();
         if(object.faceIndex === 8 || object.faceIndex === 9){
             
             
@@ -367,7 +367,7 @@ class App {
                     const objThree = obj3d;
                     const objAmmo = objThree.physicsBody;
                     if(objAmmo){
-                        if(!objAmmo.isActive()) objAmmo.activate();
+                        
                         const motionState = objAmmo.getMotionState();
                         if(motionState){
                             let tmpTrans = this._tmpTrans;
