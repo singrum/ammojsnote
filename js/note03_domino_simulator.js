@@ -214,7 +214,7 @@ class App {
         
         const domino = new THREE.Mesh(dominoGeometry, dominoMaterial);
         this._dominoStack.push(domino)
-        const mass = 1;
+        const mass = 0.5;
         
         domino.scale.set(scale.x, scale.y, scale.z);
         domino.position.set(pos[0], scale.y / 2, pos[1])
