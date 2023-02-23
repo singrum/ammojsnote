@@ -29,7 +29,8 @@ class App {
         this._clock = new THREE.Clock();
         this._dominoStack = [];
         this._isDrawOn = false;
-        this.color = Math.floor(Math.random() * 0xffffff);
+        this.hue = Math.floor(Math.random() * 360)
+        
 
 
 		this._setupCamera();
@@ -205,11 +206,10 @@ class App {
     }
 
     putDomino(pos, look){
-        if(this.color === 0xffffff) this.color = 0x000000
-        this.color +=100;
+        this.hue += 2
         const scale = {x: 0.75, y: 1, z: 0.1};
         const dominoGeometry = new THREE.BoxGeometry();
-        const dominoMaterial = new THREE.MeshPhysicalMaterial({color : Math.random() * 0xffffff, roughness : 1, }); 
+        const dominoMaterial = new THREE.MeshPhysicalMaterial({color : new THREE.Color(`hsl(${this.hue}, 100%, 50%)`), roughness : 1, }); 
  
         
         const domino = new THREE.Mesh(dominoGeometry, dominoMaterial);
