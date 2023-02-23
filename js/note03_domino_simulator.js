@@ -328,9 +328,10 @@ class App {
 		this._scene.add(light);
 
         light.castShadow = true;
-        light.shadow.mapSize.width = light.shadow.mapSize.height = 2048;
+        light.shadow.mapSize.width = light.shadow.mapSize.height = 4096;
         light.shadow.camera.left = light.shadow.camera.bottom = -15;
         light.shadow.camera.right = light.shadow.camera.top = 15;
+        light.shadow.radius = 5
 	}
 
 	_setupModel() {
