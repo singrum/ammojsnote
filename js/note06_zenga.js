@@ -75,7 +75,7 @@ class App {
             tmpPos.multiplyScalar(20);
 
             body.setLinearVelocity( new Ammo.btVector3( tmpPos.x, tmpPos.y, tmpPos.z ) );
-            
+            body.setRestitution(0.5)
             ball.physicsBody = body;        
         })
     }
@@ -94,6 +94,110 @@ class App {
             const points = new THREE.Points(geometry, material);
             this._scene.add(points)
     }
+
+
+    _createbox(){
+
+        const pos = {x: 5, y: 5,z: 5};
+        const scale = {x : 1, y : 2, z: 3};
+        const boxGeometry = new THREE.BoxGeometry(scale.x, scale.y, scale.z);
+        const boxMaterial = new THREE.MeshPhysicalMaterial({color : 0xb3e3ff}); 
+        
+        
+        const box = new THREE.Mesh(boxGeometry, boxMaterial);
+
+        
+
+
+
+        const mass = 1;
+        
+        
+        box.position.set(pos.x, pos.y, pos.z)
+        
+
+        
+        box.castShadow = true;
+        box.receiveShadow = true;
+        this._scene.add(box)
+
+        const quaternion = new THREE.Quaternion();
+        quaternion.setFromEuler(box.rotation)
+
+        const transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
+        const motionState = new Ammo.btDefaultMotionState(transform);
+        const colShape = new Ammo.btBoxShape(new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
+
+        const localInertia = new Ammo.btVector3(0,0,0);
+        colShape.calculateLocalInertia(mass, localInertia);
+
+        const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+        const body = new Ammo.btRigidBody(rbInfo);
+        body.setRestitution(0.5);
+        this._physicsWorld.addRigidBody(body);
+
+        box.physicsBody = body;
+    }
+
+
+
+
+
+
+
+
+    _createOctahedron(){
+        const geom =new THREE.OctahedronGeometry(1,0)
+        const mate = new THREE.MeshPhysicalMaterial({color : 0xaa6666, flatShading : true});
+        const mesh = new THREE.Mesh(geom, mate);
+        const pos = {x: 0, y: 1, z: 0}
+        this._scene.add(mesh)
+        mesh.position.set(pos.x, pos.y, pos.z)
+        mesh.rotateX(0.1)
+        console.log(mesh)
+        mesh.castShadow = true;
+        
+
+        const mass = 1;
+
+        const quaternion = new THREE.Quaternion();
+        quaternion.setFromEuler(mesh.rotation)
+
+        const transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
+        const motionState = new Ammo.btDefaultMotionState(transform);
+        const colShape = new Ammo.btConvexHullShape();
+        
+        for(let i = 0; i<mesh.geometry.attributes.position.count; i++){
+            
+            let point = new Ammo.btVector3(mesh.geometry.attributes.position.array[3 * i],mesh.geometry.attributes.position.array[3 * i + 1], mesh.geometry.attributes.position.array[3 * i + 2])
+            colShape.addPoint(point);
+        }
+
+        const localInertia = new Ammo.btVector3(0,0,0);
+        colShape.calculateLocalInertia(mass, localInertia);
+
+        const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+        const body = new Ammo.btRigidBody(rbInfo);
+        body.setRestitution(0.5);
+        this._physicsWorld.addRigidBody(body);
+
+        mesh.physicsBody = body;
+    }
+
+
+
+
+
+
+
+
+
 
     _createZenga(){
         const getPosArrByFloor = (floor) => {
@@ -145,7 +249,7 @@ class App {
         if(rotate90){
             brick.rotateY(Math.PI / 2);
         }
-        console.log(brick)
+        
         
 
         
@@ -169,8 +273,10 @@ class App {
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
         const body = new Ammo.btRigidBody(rbInfo);
         this._physicsWorld.addRigidBody(body);
+        body.setRestitution(0.5)
 
         brick.physicsBody = body;
+        
         return brick
     }
 
@@ -231,6 +337,7 @@ class App {
         colShape.calculateLocalInertia(mass);
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape);
         const body = new Ammo.btRigidBody(rbInfo);
+        body.setRestitution(0.5)
         this._physicsWorld.addRigidBody(body)
 
     }
@@ -263,7 +370,9 @@ class App {
 
 	_setupModel() {
 		this._createTable();
-        this._createZenga();
+        // this._createZenga();
+        this._createbox();
+        this._createOctahedron();
 	}
 
 	resize() {
