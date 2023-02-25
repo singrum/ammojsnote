@@ -2,6 +2,7 @@
 
 import * as THREE from '../node_modules/three/build/three.module.js';
 import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
+import {mergeBufferGeometries, mergeGroups} from "../node_modules/three/examples/jsm/utils/BufferGeometryUtils.js"
 
 
 class App {
@@ -31,6 +32,150 @@ class App {
 
 		requestAnimationFrame(this.render.bind(this));
 	}
+	_setupModel() {
+		this._createTable();
+        // this._createZenga();
+        this._createbox();
+        // this._createCup();
+        this._mergeTest();
+	}
+    _mergeTest(){
+        const pos = {x : 0, y : 2, z : 0};
+        const cubeGeom = new THREE.BoxGeometry(6,6,6)
+        cubeGeom.translate(0,10,0)
+        const cube = new THREE.Mesh(cubeGeom, new THREE.MeshPhysicalMaterial({color : 0xff0000,wireframe: true}))
+        
+        // this._scene.add(cube);
+        const sphereGeom =  new THREE.SphereGeometry(2,32,16)
+        const sphere = new THREE.Mesh(sphereGeom, new THREE.MeshPhysicalMaterial({color:0x0000ff, wireframe : true}))
+        // this._scene.add(sphere)
+        
+        const merge = new THREE.Mesh(mergeBufferGeometries([cubeGeom, sphereGeom]), new THREE.MeshPhysicalMaterial({color:0x0000ff, wireframe : true}))
+        merge.position.set(pos.x, pos.y, pos.z);
+        this._scene.add(merge)
+        this.castShadow = true;
+        this.receiveShadow = true;
+
+
+
+
+
+        const mass = 1;
+
+        const quaternion = new THREE.Quaternion();
+        quaternion.setFromEuler(merge.rotation)
+
+        const transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
+        const motionState = new Ammo.btDefaultMotionState(transform);
+        const colShape = this.geometry2physicsShape(merge.geometry, true);
+
+        const localInertia = new Ammo.btVector3(0,0,0);
+        colShape.calculateLocalInertia(mass, localInertia);
+
+        const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+        const body = new Ammo.btRigidBody(rbInfo);
+        body.setRestitution(0.5);
+        this._physicsWorld.addRigidBody(body);
+
+        merge.physicsBody = body;
+
+    }
+    _createCup(){
+        const pos = {x : 0, y : 5, z : 0};
+        const radiusTop = 0.5;
+        const radiusBottom = 0.4;
+        const height = 1;
+        const radialSegments = 16;
+        const heightSegments = 1;
+        const openEnded = false;
+        const cupGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded);
+        const cupTopGeometry = new THREE.SphereGeometry(radiusTop, radialSegments, heightSegments, 0, Math.PI * 2, 0, Math.PI / 2);
+        cupTopGeometry.translate(0, height / 2, 0);
+        mergeBufferGeometries([cupGeometry, cupTopGeometry]);
+
+        
+        // Create a new material for the cup (you can choose any color or texture you want)
+        const material = new THREE.MeshBasicMaterial({ color: 0xff4444 });
+        
+        // Create a new mesh with the geometry and material
+        const cupMesh = new THREE.Mesh(cupGeometry, material);
+        
+        // Add the mesh to the scene
+        this._scene.add(cupMesh);
+        
+        cupMesh.castShadow = true;
+        cupMesh.position.set(pos.x, pos.y, pos.z)
+
+        const mass = 1;
+
+        const quaternion = new THREE.Quaternion();
+        quaternion.setFromEuler(cupMesh.rotation)
+
+        const transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
+        const motionState = new Ammo.btDefaultMotionState(transform);
+        const colShape = this.geometry2physicsShape(cupMesh.geometry, true);
+
+        const localInertia = new Ammo.btVector3(0,0,0);
+        colShape.calculateLocalInertia(mass, localInertia);
+
+        const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+        const body = new Ammo.btRigidBody(rbInfo);
+        body.setRestitution(0.5);
+        this._physicsWorld.addRigidBody(body);
+
+        cupMesh.physicsBody = body;
+    }
+    geometry2physicsShape(geometry, concave = false){
+        if(concave){
+            const vertices = geometry.attributes.position.array;
+            const indices = geometry.index.array;
+
+            // Create a btTriangleMesh and add triangles to it
+            const triangleMesh = new Ammo.btTriangleMesh();
+            const vertex1 = new Ammo.btVector3();
+            const vertex2 = new Ammo.btVector3();
+            const vertex3 = new Ammo.btVector3();
+            for (let i = 0; i < indices.length; i += 3) {
+                const index1 = indices[i] * 3;
+                const index2 = indices[i + 1] * 3;
+                const index3 = indices[i + 2] * 3;
+                vertex1.setValue(vertices[index1], vertices[index1 + 1], vertices[index1 + 2]);
+                vertex2.setValue(vertices[index2], vertices[index2 + 1], vertices[index2 + 2]);
+                vertex3.setValue(vertices[index3], vertices[index3 + 1], vertices[index3 + 2]);
+                triangleMesh.addTriangle(vertex1, vertex2, vertex3, true);
+            }
+
+            // Create a btConvexTriangleMeshShape from the btTriangleMesh
+            const shape = new Ammo.btConvexTriangleMeshShape(triangleMesh);
+            return shape
+        }
+        else{
+            // Get the vertices and faces of the geometry
+            const vertices = new Float32Array(geometry.attributes.position.array);
+            
+            
+            // Create a new btConvexHullShape and add the vertices to it
+            const shape = new Ammo.btConvexHullShape();
+            for (let i = 0; i < vertices.length; i += 3) {
+            const vertex = new Ammo.btVector3(vertices[i], vertices[i + 1], vertices[i + 2]);
+            shape.addPoint(vertex);
+            }
+            return shape
+        }
+
+        
+        
+        
+    }
+
+    
+
     _setupShot(){
         const raycaster = new THREE.Raycaster();
         window.addEventListener("click", event =>{
@@ -56,7 +201,7 @@ class App {
             )
             ball.position.set(pos.x, pos.y, pos.z);
             this._scene.add(ball);
-            console.log(ball)
+            ball.castShadow = true
 
             const transform = new Ammo.btTransform();
             transform.setIdentity();
@@ -149,46 +294,7 @@ class App {
 
 
 
-    _createOctahedron(){
-        const geom =new THREE.OctahedronGeometry(1,0)
-        const mate = new THREE.MeshPhysicalMaterial({color : 0xaa6666, flatShading : true});
-        const mesh = new THREE.Mesh(geom, mate);
-        const pos = {x: 0, y: 1, z: 0}
-        this._scene.add(mesh)
-        mesh.position.set(pos.x, pos.y, pos.z)
-        mesh.rotateX(0.1)
-        console.log(mesh)
-        mesh.castShadow = true;
-        
 
-        const mass = 1;
-
-        const quaternion = new THREE.Quaternion();
-        quaternion.setFromEuler(mesh.rotation)
-
-        const transform = new Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
-        transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
-        const motionState = new Ammo.btDefaultMotionState(transform);
-        const colShape = new Ammo.btConvexHullShape();
-        
-        for(let i = 0; i<mesh.geometry.attributes.position.count; i++){
-            
-            let point = new Ammo.btVector3(mesh.geometry.attributes.position.array[3 * i],mesh.geometry.attributes.position.array[3 * i + 1], mesh.geometry.attributes.position.array[3 * i + 2])
-            colShape.addPoint(point);
-        }
-
-        const localInertia = new Ammo.btVector3(0,0,0);
-        colShape.calculateLocalInertia(mass, localInertia);
-
-        const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
-        const body = new Ammo.btRigidBody(rbInfo);
-        body.setRestitution(0.5);
-        this._physicsWorld.addRigidBody(body);
-
-        mesh.physicsBody = body;
-    }
 
 
 
@@ -368,12 +474,7 @@ class App {
         light.shadow.camera.right = light.shadow.camera.top = 15;
 	}
 
-	_setupModel() {
-		this._createTable();
-        // this._createZenga();
-        this._createbox();
-        this._createOctahedron();
-	}
+
 
 	resize() {
 		const width = this._divContainer.clientWidth;
