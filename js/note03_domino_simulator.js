@@ -270,7 +270,7 @@ class App {
 
     _createTable(){
         
-        const scale = {x:30, y:0.5, z: 30};
+        const scale = {x:60, y:0.5, z: 60};
         const position = {x: 0, y: -scale.y / 2, z: 0};
 
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(scale.x, scale.z), new THREE.MeshBasicMaterial({visible: false}));
@@ -322,16 +322,23 @@ class App {
         this._scene.add(ambientLight);
 
 		const color = 0xffffff;
-		const intensity = 0.9;
+		const intensity = 1;
 		const light = new THREE.DirectionalLight(color, intensity);
-		light.position.set(-10, 15, 10);
+		light.position.set(-30, 45, 30);
 		this._scene.add(light);
 
         light.castShadow = true;
         light.shadow.mapSize.width = light.shadow.mapSize.height = 4096;
-        light.shadow.camera.left = light.shadow.camera.bottom = -15;
-        light.shadow.camera.right = light.shadow.camera.top = 15;
-        light.shadow.radius = 5
+        light.shadow.camera.left = light.shadow.camera.bottom = -75;
+        light.shadow.camera.right = light.shadow.camera.top = 75;
+        light.shadow.radius = 1
+        const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
+		this._scene.add(cameraHelper)
+		console.log(light.shadow.camera)
+
+		this._scene.add(light);
+		this._light = light
+		light.castShadow = true;
 	}
 
 	_setupModel() {
