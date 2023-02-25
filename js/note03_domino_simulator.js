@@ -332,11 +332,10 @@ class App {
         light.shadow.camera.left = light.shadow.camera.bottom = -75;
         light.shadow.camera.right = light.shadow.camera.top = 75;
         light.shadow.radius = 1
-        const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
-		this._scene.add(cameraHelper)
-		console.log(light.shadow.camera)
+        // const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
+		// this._scene.add(cameraHelper)
+		// console.log(light.shadow.camera)
 
-		this._scene.add(light);
 		this._light = light
 		light.castShadow = true;
 	}
