@@ -43,7 +43,7 @@ class App {
         return Math.random() * (b - a ) + a
     }
     _setupBackground(){
-        this._scene.background = new THREE.Color(0xdddddd)
+        this._scene.background = new THREE.Color(0x6EB1FF)
     }
     _setupModel() {
         const gltfLoader = new GLTFLoader()
@@ -134,13 +134,13 @@ class App {
         this.beeArr.push(clone)
         clone.traverse( function( node ) { if ( node.isMesh ) { node.castShadow = true; }} );
 
-        const randomR = Math.random() * (LVRange[1] - LVRange[0]) + LVRange[0];
-        const randomY = Math.random() * (YRange[1] - YRange[0]) + YRange[0];
-        const randomT = Math.random() * Math.PI * 2;
+        const randomR = this.randRange(10,20)
+        const randomY = this.randRange(50,60)
+        const randomT = this.randRange(0, Math.PI * 2)
         clone.physicsBody.setLinearVelocity( new Ammo.btVector3( randomR * Math.cos(randomT), randomY, randomR * Math.sin(randomT)))
-        clone.physicsBody.setAngularVelocity(new Ammo.btVector3(Math.random() * (AVRange[1] - AVRange[0]) + AVRange[0] - (AVRange[0] + AVRange[1]) / 2,
-        Math.random() * (AVRange[1] - AVRange[0]) + AVRange[0] - (AVRange[0] + AVRange[1]) / 2,
-        Math.random() * (AVRange[1] - AVRange[0]) + AVRange[0] - (AVRange[0] + AVRange[1]) / 2))
+        clone.physicsBody.setAngularVelocity(new Ammo.btVector3(this.randRange(-5,5),
+        this.randRange(-5,5),
+        this.randRange(-5,5)))
 
         clone.info = {};
         clone.info.radius = this.randRange(20,40);
@@ -217,9 +217,11 @@ class App {
         controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
         controls.dampingFactor = 0.05;
         controls.minDistance = 50;
-        controls.maxDistance = 200;
+        controls.maxDistance = 120;
         controls.screenSpacePanning = false;
         controls.maxPolarAngle = Math.PI / 2;
+        this.controls = controls
+        
 
         const touchSphere = new THREE.Mesh(new THREE.SphereGeometry(7,64,32),  new THREE.MeshBasicMaterial({visible: false}));
         touchSphere.position.set(0,13,0)
@@ -251,7 +253,7 @@ class App {
 
                     
                     const tween1 = new TWEEN.Tween(bee.position)
-                    .to({x : bee.position.x, y : bee.position.y + 10, z : bee.position.z}, 1000)
+                    .to({x : bee.position.x, y : bee.position.y + 5, z : bee.position.z}, 1000)
                     .easing(TWEEN.Easing.Quadratic.In)
                     .onComplete(()=>{
                         this.flyFlag = true;
@@ -310,12 +312,24 @@ class App {
 	}
 
     _createTable(){
+
+
+        const groundGeometry = new THREE.PlaneGeometry(500,500);
+        const material = new THREE.ShadowMaterial();
+        material.opacity = 0.5;
+
+        const mesh = new THREE.Mesh( groundGeometry, material );
+        mesh.receiveShadow = true;
+        mesh.rotation.x = THREE.MathUtils.degToRad(-90);
+        mesh.position.y = 0.01
+        this._scene.add( mesh );
+
+        
         const texture = new THREE.TextureLoader().load( '../src/grass.png' );
         texture.magFilter = THREE.NearestFilter;
         
 
-        const scale = {x:1000, y:0.5, z: 1000};
-        const position = {x: 0, y: -scale.y / 2, z: 0};
+
 
         // const plane = new THREE.Mesh(new THREE.PlaneGeometry(scale.x, scale.z), new THREE.MeshBasicMaterial({visible: false}));
         // plane.position.set(position.x, position.y + scale.y / 2, position.z)
@@ -323,15 +337,15 @@ class App {
         // this._scene.add(plane)
         // this._plane = plane
         
-        const blockWidth = 20;
+        const blockWidth = 13;
         const blockGeometry = new THREE.BoxGeometry(blockWidth,blockWidth,blockWidth);
         const blockMaterial = new THREE.MeshLambertMaterial({ map: texture, side: THREE.DoubleSide });
         const block = new THREE.Mesh(blockGeometry, blockMaterial);
-        block.position.set(0,-10,0)
+        block.position.set(0,-blockWidth/2,0)
         this._scene.add(block)
 
-        for(let i = -5; i<5; i++){
-            for(let j = -5;j<5;j++){
+        for(let i = -10; i<10; i++){
+            for(let j = -10;j<10;j++){
                 const clone = block.clone();
                 clone.position.set(blockWidth * i, -blockWidth/2, blockWidth * j)
                 this._scene.add(clone)
@@ -341,6 +355,9 @@ class App {
 
 
 
+
+        const scale = {x:1000, y:0.5, z: 1000};
+        const position = {x: 0, y: -scale.y / 2, z: 0};
         
         const tableGeometry = new THREE.BoxGeometry();
         const tableMaterial = new THREE.MeshLambertMaterial({ visible : false});
@@ -349,7 +366,7 @@ class App {
         
         table.position.set(position.x, position.y, position.z);
         table.scale.set(scale.x, scale.y, scale.z);
-        table.receiveShadow = true;
+        
         this._scene.add(table)
         this._table = table;
 
@@ -414,7 +431,8 @@ class App {
 	render() {
 		this._renderer.render(this._scene, this._camera);
 		this.update();
-        TWEEN.update()
+        TWEEN.update();
+        this.controls.update();
 		requestAnimationFrame(this.render.bind(this));
 	}
 
