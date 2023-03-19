@@ -3,10 +3,13 @@
 import * as THREE from '../node_modules/three/build/three.module.js';
 import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
 import {GLTFLoader} from "../node_modules/three/examples/jsm/loaders/GLTFLoader.js"
+import * as TWEEN from "../node_modules/@tweenjs/tween.js/dist/tween.esm.js"
+
 
 
 class App {
 	constructor() {
+        
 		const divContainer = document.querySelector("#webgl_container");
 		this._divContainer = divContainer;
 
@@ -20,8 +23,10 @@ class App {
 		const scene = new THREE.Scene();
 		this._scene = scene;
         this._clock = new THREE.Clock();
-        this._time = 0;
-        this._step = 0.1
+        this.time = 0;
+        this.step = 0.1
+        this.onAmmo = true;
+        this.beeArr = []
         this._setupBackground();
 		this._setupCamera();
 		this._setupLight();
@@ -34,6 +39,9 @@ class App {
 
 		
 	}
+    randRange(a, b){
+        return Math.random() * (b - a ) + a
+    }
     _setupBackground(){
         this._scene.background = new THREE.Color(0xdddddd)
     }
@@ -49,21 +57,12 @@ class App {
                         this._scene.add(hive)
                         hive.traverse( function( node ) { if ( node.isMesh ) { node.castShadow = true; }} );
                         
-
-                        
-
                         this.beeGltf = gltf2;
                                            
                         this.mixer = new THREE.AnimationMixer(this.beeGltf.scene);
-                        const animationAction = this.mixer.clipAction(this.beeGltf.animations[0]);
-                        this.animationAction = animationAction
+                        // const animationAction = this.mixer.clipAction(this.beeGltf.animations[0]);
+                        // this.animationAction = animationAction
                         
-
-
-                        
-
-
-
                         const beeModel = gltf2.scene;
                         this.beeModel = beeModel;
                         const body = beeModel.children[0].children[0].children[0].children[0]
@@ -91,14 +90,8 @@ class App {
                         this.group.add(beeModel);
                         this.group.aabb = aabb
                         
-                        
-                        
-
-
-
                         this._createTable();
                         
-
                         requestAnimationFrame(this.render.bind(this));
                     }
                 )
@@ -116,7 +109,8 @@ class App {
         const animationClip = this.beeGltf.animations[0];
 
         const clone = this.group.clone();
-        // const animationAction = this.mixer.clipAction(animationClip);
+        const animationAction = this.mixer.clipAction(animationClip, clone);
+        clone.animationAction = animationAction;
         // animationAction.clampWhenFinished = true;
         // animationAction.loop = THREE.LoopOnce;
         // animationAction.reset();
@@ -128,17 +122,16 @@ class App {
         // animationAction.setEffectiveWeight(1);
         // animationAction.setLoop(THREE.LoopOnce, 0);
     
-        // animationAction.play();
-        // animationAction.paused = false;
-    
-        this.mixer.clipAction(animationClip, clone).play();
+        animationAction.play();
+        animationAction.paused = true;
+
+
         
-
-
-
-        this.setPhysics(clone, obj.aabb)
         clone.rotation.set(0,Math.PI,0)
+        clone.position.set(0,20,0);
+        this.setPhysics(clone, obj.aabb)
         this._scene.add(clone)
+        this.beeArr.push(clone)
         clone.traverse( function( node ) { if ( node.isMesh ) { node.castShadow = true; }} );
 
         const randomR = Math.random() * (LVRange[1] - LVRange[0]) + LVRange[0];
@@ -148,13 +141,19 @@ class App {
         clone.physicsBody.setAngularVelocity(new Ammo.btVector3(Math.random() * (AVRange[1] - AVRange[0]) + AVRange[0] - (AVRange[0] + AVRange[1]) / 2,
         Math.random() * (AVRange[1] - AVRange[0]) + AVRange[0] - (AVRange[0] + AVRange[1]) / 2,
         Math.random() * (AVRange[1] - AVRange[0]) + AVRange[0] - (AVRange[0] + AVRange[1]) / 2))
+
+        clone.info = {};
+        clone.info.radius = this.randRange(20,40);
+        clone.info.theta = this.randRange(0,2 * Math.PI);
+        clone.info.velocity = this.randRange(0.1,0.2);
+
+
     }
     setPhysics(obj, box3){
-        const pos = {x: 0, y: 20,z: 0};
+        const pos = obj.position
         const scale = {x : box3.max.x - box3.min.x, y : box3.max.y - box3.min.y, z : box3.max.z - box3.min.z};
         const mass = 1;
-        obj.position.set(pos.x,pos.y,pos.z)
-        
+        // obj.position.set(pos.x,pos.y,pos.z)
         
         const quaternion = new THREE.Quaternion();
         quaternion.setFromEuler(obj.rotation)
@@ -215,6 +214,9 @@ class App {
 
 	_setupControls(){
         const touchSphere = new THREE.Mesh(new THREE.SphereGeometry(7,64,32),  new THREE.MeshBasicMaterial({visible: false}));
+        touchSphere.position.set(0,13,0)
+        this._scene.add(touchSphere);
+
         const isTouchHive = point => {
             const raycaster = new THREE.Raycaster();
             
@@ -231,21 +233,54 @@ class App {
         }
 		new OrbitControls(this._camera, this._divContainer);
 
-
+        const beeFly = ()=>{
+            
+            this.beeArr.forEach( bee =>{
+                    this._physicsWorld.removeRigidBody(bee.physicsBody)
+                    bee.animationAction.paused = false;
+                    const tween1 = new TWEEN.Tween({x : 0, y: 0, z : 0})
+                    .to({x : 10, y : 20, z : 10})
+                    const update =  function(object, elapsed){bee.position.set(object.x,object.y,object.z)}
+                    tween1.onUpdate(update)
+                    tween1.start()
+                }
+            )
+        }
         
-        touchSphere.position.set(0,13,0)
-        this._scene.add(touchSphere);
+        const touchEnd = ()=>{
+            this.isTouch = false;
+            this.beeArr.forEach(bee=>{
+                this.setPhysics(bee, this.group.aabb)
+                bee.animationAction.paused = true;
+            })
+            window.removeEventListener("touchend", touchEnd)
+        }
+
 
         const touchstartEvent = evt=>{
             this.currPoint = [evt.touches[0].clientX, evt.touches[0].clientY]
-            if(! this.currPoint) return;
-            
-            if(! isTouchHive(this.currPoint)){
+
+            if(isTouchHive(this.currPoint)){
+                this.addClone(this.group)
+                
+            }
+
+            else{
+                this.isTouch = true;
+                this.positioningFlag = true;
+                this.once = true;
+                beeFly();
+                window.addEventListener("touchend", touchEnd)
                 return;
             }
-            this.addClone(this.group)
+
+
+
+
         }
+        
         window.addEventListener("touchstart", touchstartEvent)
+
 
 	}
 
@@ -337,41 +372,72 @@ class App {
 	}
 
 	update() {
-		this.time  += this.step
+		this.time += this.step
 		
         const deltaTime = this._clock.getDelta();
         this.mixer.update(deltaTime);
-
+        // if(this.beeArr[0]){
+        //     console.log(this.beeArr[0].rotation.x)
+        // }
         
-        
-        if(this._physicsWorld){
-            this._physicsWorld.stepSimulation(deltaTime, 10);
-            
-            
+        if(!this.isTouch){
+            if(this._physicsWorld){
 
-            this._scene.children.forEach(obj3d => {
-                if(obj3d instanceof THREE.Mesh){
-                    
-                    const objThree = obj3d;
-                    const objAmmo = objThree.physicsBody;
-                    if(objAmmo){
-                        const motionState = objAmmo.getMotionState();
-                        if(motionState){
-                            
-                            let tmpTrans = this._tmpTrans;
-                            if(tmpTrans === undefined) tmpTrans = this._tmpTrans = new Ammo.btTransform();
-                            motionState.getWorldTransform(tmpTrans);
-                            
-                            const pos = tmpTrans.getOrigin();
-                            const quat = tmpTrans.getRotation();
-
-                            objThree.position.set(pos.x(), pos.y(), pos.z());
-                            objThree.quaternion.set(quat.x(), quat.y(), quat.z(), quat.w());
+            
+                this._physicsWorld.stepSimulation(deltaTime, 10);
+                
+                
+    
+                this._scene.children.forEach(obj3d => {
+                    if(obj3d instanceof THREE.Mesh){
+                        
+                        const objThree = obj3d;
+                        const objAmmo = objThree.physicsBody;
+                        if(objAmmo){
+                            const motionState = objAmmo.getMotionState();
+                            if(motionState){
+                                
+                                let tmpTrans = this._tmpTrans;
+                                if(tmpTrans === undefined) tmpTrans = this._tmpTrans = new Ammo.btTransform();
+                                motionState.getWorldTransform(tmpTrans);
+                                
+                                const pos = tmpTrans.getOrigin();
+                                const quat = tmpTrans.getRotation();
+    
+                                objThree.position.set(pos.x(), pos.y(), pos.z());
+                                objThree.quaternion.set(quat.x(), quat.y(), quat.z(), quat.w());
+                            }
                         }
                     }
-                }
-            })
+                })
+            }
         }
+        // if(this.isTouch && this.positioningFlag && this.once){
+            
+        //     for(let bee of this.beeArr){
+        //         bee.info.startPosition = bee.position.clone();
+        //     }
+        //     this.once = false;
+            
+        // }
+        // if(this.isTouch && this.positioningFlag && !this.once){
+        //     for(let bee of this.beeArr){
+        //         bee.position.add(new THREE.Vector3(bee.info.radius * Math.cos(bee.info.theta), 0, bee.info.radius * Math.sin(bee.info.theta)))
+        //     }
+        //     this.once = false;
+        // }
+        // if(this.isTouch && this.flyFlag && !this.once){
+        //     for(let bee of this.beeArr){
+        //         console.log(this.time)
+        //         bee.position.x = bee.info.radius * Math.cos(bee.info.theta + this.time * bee.info.velocity);
+                
+        //         bee.position.z = bee.info.radius * Math.sin(bee.info.theta + this.time * bee.info.velocity);
+        //     }
+            
+        // }
+
+        
+
 	}
 }
 
