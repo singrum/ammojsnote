@@ -251,7 +251,7 @@ class App {
 
                     
                     const tween1 = new TWEEN.Tween(bee.position)
-                    .to({x : bee.position.x, y : this.randRange(bee.position.y,this.randRange(10,30)), z : bee.position.z}, 1000)
+                    .to({x : bee.position.x, y : bee.position.y + 10, z : bee.position.z}, 1000)
                     .easing(TWEEN.Easing.Quadratic.In)
                     .onComplete(()=>{
                         this.flyFlag = true;
@@ -261,7 +261,7 @@ class App {
                     tween1.start();
 
 
-                    console.log(bee.rotation.y)
+                    
                     const tween2 = new TWEEN.Tween(bee.rotation).to({x : 0, y : bee.rotation.y, z : 0},1000)
                     .easing(TWEEN.Easing.Quadratic.InOut)
                     tween2.start()
@@ -356,7 +356,7 @@ class App {
 		const width = this._divContainer.clientWidth;
 		const height = this._divContainer.clientHeight;
 		const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-		camera.position.set(40,40,80)
+		camera.position.set(-50,70,-70)
         camera.lookAt(0,0,0)
 		this._camera = camera;
 	}
@@ -444,6 +444,7 @@ class App {
             for(let bee of this.beeArr){
                 bee.tempY = bee.position.y;
                 bee.random = this.randRange(0,1);
+                bee.random2 = this.randRange(1,1.5)
             }
             this.once = false;
             
@@ -451,7 +452,7 @@ class App {
         if(this.flyFlag){
             for(let bee of this.beeArr){
                 
-                bee.position.y = Math.sin(this.time * bee.random) + bee.tempY
+                bee.position.y =  bee.random2* Math.sin(this.time * bee.random) + bee.tempY
             }
         }
 
