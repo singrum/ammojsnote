@@ -238,10 +238,39 @@ class App {
             this.beeArr.forEach( bee =>{
                     this._physicsWorld.removeRigidBody(bee.physicsBody)
                     bee.animationAction.paused = false;
-                    const tween1 = new TWEEN.Tween({x : 0, y: 0, z : 0})
-                    .to({x : 10, y : 20, z : 10})
-                    const update =  function(object, elapsed){bee.position.set(object.x,object.y,object.z)}
-                    tween1.onUpdate(update)
+                    const polar = {theta : Math.atan(bee.position.x / bee.position.z)}
+                    const r = this.randRange(10,30)
+                    const theta = Math.atan(bee.position.x / bee.position.z)
+
+                    const tween1 = new TWEEN.Tween(bee.position)
+                    .to({x : bee.position.x, y : this.randRange(bee.position.y,bee.position.y + 10), z : bee.position.z}, 1000)
+                    .onStart(function(){
+                        new TWEEN.Tween(bee.rotation).to({x : 0, y : Math.atan(bee.position.x / bee.position.z) + Math.PI/2, z : 0})
+                        .easing(TWEEN.Easing.Quadratic.Out)
+                        .start();
+                    })
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .onComplete(()=>{
+                        this.once = true;
+                        this.flyFlag = true;
+                    })
+                    // .chain(new TWEEN.Tween(theta)
+                    //     .to({theta + Math.PI * 2})
+                    // )
+
+                    // const tween2 = new TWEEN.Tween(polar)
+                    // .to(polar.theta + 2 * Math.PI)
+
+                    // tween1.chain(tween2)
+
+
+                    // const update =  function(polar, elapsed){
+                    //     const r = Math.hypot(bee.position.x, bee.position.z);
+                    //     bee.position.x = (r * Math.cos(polar.theta));
+                    //     bee.position.z = (r * Math.sin(polar.theta));
+                    // }
+                    bee.tween = tween1;
+                    // tween2.onUpdate(update)
                     tween1.start()
                 }
             )
@@ -249,9 +278,11 @@ class App {
         
         const touchEnd = ()=>{
             this.isTouch = false;
+            this.flyFlag = false
             this.beeArr.forEach(bee=>{
                 this.setPhysics(bee, this.group.aabb)
                 bee.animationAction.paused = true;
+                bee.tween.stop()
             })
             window.removeEventListener("touchend", touchEnd)
         }
@@ -268,7 +299,7 @@ class App {
             else{
                 this.isTouch = true;
                 this.positioningFlag = true;
-                this.once = true;
+                
                 beeFly();
                 window.addEventListener("touchend", touchEnd)
                 return;
@@ -368,6 +399,7 @@ class App {
 	render() {
 		this._renderer.render(this._scene, this._camera);
 		this.update();
+        TWEEN.update()
 		requestAnimationFrame(this.render.bind(this));
 	}
 
@@ -412,29 +444,23 @@ class App {
                 })
             }
         }
-        // if(this.isTouch && this.positioningFlag && this.once){
+        if(this.flyFlag && this.once){
+            for(let bee of this.beeArr){
+                bee.theta = Math.atan(bee.position.z / bee.position.x);
+                bee.radius = Math.hypot(bee.position.x, bee.position.z);
+            }
+            this.once = false;
+            this.time = 0
+        }
+        if(this.flyFlag ){
             
-        //     for(let bee of this.beeArr){
-        //         bee.info.startPosition = bee.position.clone();
-        //     }
-        //     this.once = false;
-            
-        // }
-        // if(this.isTouch && this.positioningFlag && !this.once){
-        //     for(let bee of this.beeArr){
-        //         bee.position.add(new THREE.Vector3(bee.info.radius * Math.cos(bee.info.theta), 0, bee.info.radius * Math.sin(bee.info.theta)))
-        //     }
-        //     this.once = false;
-        // }
-        // if(this.isTouch && this.flyFlag && !this.once){
-        //     for(let bee of this.beeArr){
-        //         console.log(this.time)
-        //         bee.position.x = bee.info.radius * Math.cos(bee.info.theta + this.time * bee.info.velocity);
-                
-        //         bee.position.z = bee.info.radius * Math.sin(bee.info.theta + this.time * bee.info.velocity);
-        //     }
-            
-        // }
+            for(let bee of this.beeArr){
+                bee.position.x = bee.radius * Math.cos(this.time + bee.theta)
+                bee.position.z = bee.radius * Math.sin(this.time + bee.theta)
+                bee.rotation.y = Math.atan(this.time + bee.theta + Math.PI/2)
+                console.log(bee.rotation)
+            }
+        }
 
         
 
