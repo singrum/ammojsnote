@@ -54,11 +54,11 @@ class App {
 
                         this.beeGltf = gltf2;
                                            
-                        this._mixer = new THREE.AnimationMixer(this.beeGltf.scene);
-                        const animationAction = this._mixer.clipAction(this.beeGltf.animations[0]);
-                        animationAction.play();
-                        console.log()
-                        console.log(animationAction)
+                        this.mixer = new THREE.AnimationMixer(this.beeGltf.scene);
+                        const animationAction = this.mixer.clipAction(this.beeGltf.animations[0]);
+                        this.animationAction = animationAction
+                        
+
 
                         
 
@@ -90,8 +90,7 @@ class App {
                         this.group = new THREE.Mesh();
                         this.group.add(beeModel);
                         this.group.aabb = aabb
-                        this._scene.add(this.group)
-                        console.log(this.group)
+                        
                         
                         
 
@@ -107,13 +106,32 @@ class App {
         )
     }
     addClone(obj){
-
+        
         const LVRange = [0,20]
         const YRange = [30,50]
         const AVRange = [0,5]
-                        
-        const clone = new THREE.Mesh();
-        clone.add(this.beeModel);
+        
+        
+
+        const animationClip = this.beeGltf.animations[0];
+
+        const clone = this.group.clone();
+        const animationAction = this.mixer.clipAction(animationClip);
+        animationAction.clampWhenFinished = true;
+        animationAction.loop = THREE.LoopOnce;
+        animationAction.reset();
+        animationAction.play();
+        animationAction.paused = true;
+        animationAction.time = 0;
+    
+        animationAction.setEffectiveTimeScale(1);
+        animationAction.setEffectiveWeight(1);
+        animationAction.setLoop(THREE.LoopOnce, 0);
+    
+        animationAction.play();
+        animationAction.paused = false;
+    
+        this.mixer.clipAction(animationClip, clone).play();
         
 
 
@@ -322,7 +340,7 @@ class App {
 		this.time  += this.step
 		
         const deltaTime = this._clock.getDelta();
-        this._mixer.update(deltaTime);
+        this.mixer.update(deltaTime);
 
         
         
