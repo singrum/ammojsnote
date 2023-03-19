@@ -20,7 +20,8 @@ class App {
 		const scene = new THREE.Scene();
 		this._scene = scene;
         this._clock = new THREE.Clock();
-        this.brickScale = {x: 3, y: 0.7, z: 1};
+        this._time = 0;
+        this._step = 0.1
 		this._setupCamera();
 		this._setupLight();
         this._setupAmmo();
@@ -30,94 +31,110 @@ class App {
 		window.onresize = this.resize.bind(this);
 		this.resize();
 
-		requestAnimationFrame(this.render.bind(this));
+		
 	}
     _setupModel() {
         const gltfLoader = new GLTFLoader()
-        
-        const url = '../src/mc_bee/scene.gltf';
         gltfLoader.load(
-            url,
-            (gltf)=>{
-                const root = gltf.scene;
-                // this._scene.add(root);
-                // root.scale.multiplyScalar(0.4); /url1
-                // root.scale.multiplyScalar(0.2);
-                const bee = root.children[0].children[0].children[0]
-                // this._scene.add(bee)
-                bee.rotation.set(0,0,0)
-                const body = bee.children[0]
-                body.scale.set(1,1,1)
-                const box1 = new THREE.Box3().setFromObject(body.children[0])
-                const box2 = new THREE.Box3().setFromObject(body.children[1])
-                const beeBox = {
-                    max : {
-                        x : box1.max.x,
-                        y : box1.max.y,
-                        z : box2.max.z
-                    },
-                    min : {
-                        x : box1.min.x,
-                        y : box1.min.y,
-                        z : box1.min.z
-                    },
-                }
-
-                this._scene.add(body.children)
+            '../src/mc_hive/source/model.gltf',(gltf1)=>{
+                gltfLoader.load(
+                    '../src/mc_bee/scene.gltf',(gltf2)=>{
+                        const hive = gltf1.scene
+                        hive.scale.set(10,10,10)
+                        this._scene.add(hive)
+                        
+                        
+                        // this._scene.add(gltf2.scene)
+                        this._mixer = new THREE.AnimationMixer(gltf2.scene);
+                        
+                        const animationAction = this._mixer.clipAction(gltf2.animations[0]);
+                        animationAction.play();
+                        
 
 
+                        const beeModel = gltf2.scene;
+                        const bee = gltf2.scene.children[0].children[0].children[0]
+                        const body = bee.children[0]
+                        body.children.splice(2,1)
+                        
+                        const temp = new THREE.Box3().setFromObject( body )
+                        const aabbPos = {x : (temp.min.x + temp.max.x)/2,
+                            y : (temp.min.y + temp.max.y)/2,
+                            z : (temp.min.z + temp.max.z)/2
+                        };
+
+                           const aabb = {
+                            min : {x : temp.min.x - aabbPos.x,
+                                y : temp.min.y - aabbPos.y,
+                                z : temp.min.z - aabbPos.z},
+                            max : {x : temp.max.x - aabbPos.x,
+                                y : temp.max.y - aabbPos.y,
+                                z : temp.max.z - aabbPos.z
+                            }
+                        };
+                        
+                        beeModel.position.set(-aabbPos.x, -aabbPos.y, -aabbPos.z)
+                        
+                        const group = new THREE.Mesh();
+                        group.add(beeModel);
+                        group.name = "bee";
+
+                        
+                        
+                        
+                        const clone = group.clone();
+                        this.setPhysics(clone, aabb)
+                        clone.rotation.set(0,Math.PI,0)
+                        this._scene.add(clone)
+                        clone.traverse( function( node ) { if ( node.isMesh ) { node.castShadow = true; }} );
+                        const velocityRange = [20,60]
+                        clone.physicsBody.setLinearVelocity( new Ammo.btVector3( Math.random() * (velocityRange[1] - velocityRange[0]) + velocityRange[0] - (velocityRange[0] + velocityRange[1]) / 2,
+                        Math.random() * (velocityRange[1] - velocityRange[0]) + velocityRange[0] - (velocityRange[0] + velocityRange[1]) / 2,
+                        Math.random() * (velocityRange[1] - velocityRange[0]) + velocityRange[0] - (velocityRange[0] + velocityRange[1]) / 2))
 
 
+                        
+                        
+                        
 
 
+        
+                        this._createTable();
+                        // this._createbox();
 
-
-                this._createTable();
-                this._createbox();
+                        requestAnimationFrame(this.render.bind(this));
+                    }
+                )
             }
         )
     }
-    geometry2physicsShape(geometry, concave = false){
-        if(concave){
-            const vertices = geometry.attributes.position.array;
-            const indices = geometry.index.array;
-
-            // Create a btTriangleMesh and add triangles to it
-            const triangleMesh = new Ammo.btTriangleMesh();
-            const vertex1 = new Ammo.btVector3();
-            const vertex2 = new Ammo.btVector3();
-            const vertex3 = new Ammo.btVector3();
-            for (let i = 0; i < indices.length; i += 3) {
-                const index1 = indices[i] * 3;
-                const index2 = indices[i + 1] * 3;
-                const index3 = indices[i + 2] * 3;
-                vertex1.setValue(vertices[index1], vertices[index1 + 1], vertices[index1 + 2]);
-                vertex2.setValue(vertices[index2], vertices[index2 + 1], vertices[index2 + 2]);
-                vertex3.setValue(vertices[index3], vertices[index3 + 1], vertices[index3 + 2]);
-                triangleMesh.addTriangle(vertex1, vertex2, vertex3, true);
-            }
-
-            // Create a btConvexTriangleMeshShape from the btTriangleMesh
-            const shape = new Ammo.btConvexTriangleMeshShape(triangleMesh);
-            return shape
-        }
-        else{
-            // Get the vertices and faces of the geometry
-            const vertices = new Float32Array(geometry.attributes.position.array);
-            
-            
-            // Create a new btConvexHullShape and add the vertices to it
-            const shape = new Ammo.btConvexHullShape();
-            for (let i = 0; i < vertices.length; i += 3) {
-            const vertex = new Ammo.btVector3(vertices[i], vertices[i + 1], vertices[i + 2]);
-            shape.addPoint(vertex);
-            }
-            return shape
-        }
-
+    setPhysics(obj, box3){
+        const pos = {x: 0, y: 20,z: 0};
+        const scale = {x : box3.max.x - box3.min.x, y : box3.max.y - box3.min.y, z : box3.max.z - box3.min.z};
+        const mass = 1;
+        obj.position.set(pos.x,pos.y,pos.z)
         
         
+        const quaternion = new THREE.Quaternion();
+        quaternion.setFromEuler(obj.rotation)
+
+        const transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        transform.setRotation(new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
+        const motionState = new Ammo.btDefaultMotionState(transform);
+        const colShape = new Ammo.btBoxShape(new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
+
+        const localInertia = new Ammo.btVector3(0,0,0);
+        colShape.calculateLocalInertia(mass, localInertia);
+
+        const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+        const body = new Ammo.btRigidBody(rbInfo);
+        body.setRestitution(0.4);
         
+        this._physicsWorld.addRigidBody(body);
+
+        obj.physicsBody = body;
     }
 
 
@@ -178,7 +195,7 @@ class App {
 
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
         const body = new Ammo.btRigidBody(rbInfo);
-        body.setRestitution(0.5);
+        body.setRestitution(0.3);
         this._physicsWorld.addRigidBody(body);
 
         box.physicsBody = body;
@@ -195,7 +212,7 @@ class App {
 
             const physicsWorld = new Ammo.btDiscreteDynamicsWorld(
                 dispatcher, overlappingPairCache, solver, collisionConfiguration);
-            physicsWorld.setGravity(new Ammo.btVector3(0, -9.807, 0));
+            physicsWorld.setGravity(new Ammo.btVector3(0, -50, 0));
 
             this._physicsWorld = physicsWorld;
             this._setupModel();
@@ -208,7 +225,7 @@ class App {
 
     _createTable(){
         
-        const scale = {x:30, y:0.5, z: 30};
+        const scale = {x:100, y:0.5, z: 100};
         const position = {x: 0, y: -scale.y / 2, z: 0};
 
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(scale.x, scale.z), new THREE.MeshBasicMaterial({visible: false}));
@@ -243,7 +260,7 @@ class App {
         colShape.calculateLocalInertia(mass);
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape);
         const body = new Ammo.btRigidBody(rbInfo);
-        body.setRestitution(0.5)
+        body.setRestitution(0.3)
         this._physicsWorld.addRigidBody(body)
 
     }
@@ -253,7 +270,7 @@ class App {
 		const width = this._divContainer.clientWidth;
 		const height = this._divContainer.clientHeight;
 		const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-		camera.position.set(0,5,10)
+		camera.position.set(40,40,80)
         camera.lookAt(0,0,0)
 		this._camera = camera;
 	}
@@ -286,29 +303,34 @@ class App {
 		this._renderer.setSize(width, height);
 	}
 
-	render(time) {
+	render() {
 		this._renderer.render(this._scene, this._camera);
-		this.update(time);
+		this.update();
 		requestAnimationFrame(this.render.bind(this));
 	}
 
-	update(time) {
-		time *= 0.001;
+	update() {
+		this.time  += this.step
 		
         const deltaTime = this._clock.getDelta();
+        this._mixer.update(deltaTime);
+
+        
         
         if(this._physicsWorld){
             this._physicsWorld.stepSimulation(deltaTime, 10);
             
             
 
-            this._scene.traverse(obj3d => {
+            this._scene.children.forEach(obj3d => {
                 if(obj3d instanceof THREE.Mesh){
+                    
                     const objThree = obj3d;
                     const objAmmo = objThree.physicsBody;
                     if(objAmmo){
                         const motionState = objAmmo.getMotionState();
                         if(motionState){
+                            
                             let tmpTrans = this._tmpTrans;
                             if(tmpTrans === undefined) tmpTrans = this._tmpTrans = new Ammo.btTransform();
                             motionState.getWorldTransform(tmpTrans);
