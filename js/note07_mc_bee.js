@@ -127,7 +127,7 @@ class App {
 
 
         
-        clone.rotation.set(0,Math.PI,0)
+        clone.rotation.set(0,this.randRange(0,2 * Math.PI),0)
         clone.position.set(0,20,0);
         this.setPhysics(clone, obj.aabb)
         this._scene.add(clone)
@@ -213,6 +213,14 @@ class App {
     }
 
 	_setupControls(){
+		const controls = new OrbitControls(this._camera, this._divContainer);
+        controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 100;
+        controls.maxDistance = 500;
+        controls.screenSpacePanning = false;
+        controls.maxPolarAngle = Math.PI / 2;
+
         const touchSphere = new THREE.Mesh(new THREE.SphereGeometry(7,64,32),  new THREE.MeshBasicMaterial({visible: false}));
         touchSphere.position.set(0,13,0)
         this._scene.add(touchSphere);
@@ -231,47 +239,34 @@ class App {
             }
             return true;
         }
-		new OrbitControls(this._camera, this._divContainer);
+
 
         const beeFly = ()=>{
             
             this.beeArr.forEach( bee =>{
                     this._physicsWorld.removeRigidBody(bee.physicsBody)
                     bee.animationAction.paused = false;
-                    const polar = {theta : Math.atan(bee.position.x / bee.position.z)}
-                    const r = this.randRange(10,30)
-                    const theta = Math.atan(bee.position.x / bee.position.z)
 
+                    const random = this.randRange(0,10);
+
+                    
                     const tween1 = new TWEEN.Tween(bee.position)
-                    .to({x : bee.position.x, y : this.randRange(bee.position.y,bee.position.y + 10), z : bee.position.z}, 1000)
-                    .onStart(function(){
-                        new TWEEN.Tween(bee.rotation).to({x : 0, y : Math.atan(bee.position.x / bee.position.z) + Math.PI/2, z : 0})
-                        .easing(TWEEN.Easing.Quadratic.Out)
-                        .start();
-                    })
-                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .to({x : bee.position.x, y : this.randRange(bee.position.y,this.randRange(10,30)), z : bee.position.z}, 1000)
+                    .easing(TWEEN.Easing.Quadratic.In)
                     .onComplete(()=>{
-                        this.once = true;
                         this.flyFlag = true;
+                        this.once = true;
+                        this.time = 0;
                     })
-                    // .chain(new TWEEN.Tween(theta)
-                    //     .to({theta + Math.PI * 2})
-                    // )
-
-                    // const tween2 = new TWEEN.Tween(polar)
-                    // .to(polar.theta + 2 * Math.PI)
-
-                    // tween1.chain(tween2)
+                    tween1.start();
 
 
-                    // const update =  function(polar, elapsed){
-                    //     const r = Math.hypot(bee.position.x, bee.position.z);
-                    //     bee.position.x = (r * Math.cos(polar.theta));
-                    //     bee.position.z = (r * Math.sin(polar.theta));
-                    // }
-                    bee.tween = tween1;
-                    // tween2.onUpdate(update)
-                    tween1.start()
+                    console.log(bee.rotation.y)
+                    const tween2 = new TWEEN.Tween(bee.rotation).to({x : 0, y : bee.rotation.y, z : 0},1000)
+                    .easing(TWEEN.Easing.Quadratic.InOut)
+                    tween2.start()
+
+                    bee.tween = [tween1, tween2];
                 }
             )
         }
@@ -282,7 +277,7 @@ class App {
             this.beeArr.forEach(bee=>{
                 this.setPhysics(bee, this.group.aabb)
                 bee.animationAction.paused = true;
-                bee.tween.stop()
+                bee.tween.forEach(e=> e.stop())
             })
             window.removeEventListener("touchend", touchEnd)
         }
@@ -298,7 +293,6 @@ class App {
 
             else{
                 this.isTouch = true;
-                this.positioningFlag = true;
                 
                 beeFly();
                 window.addEventListener("touchend", touchEnd)
@@ -373,10 +367,10 @@ class App {
 
 		const color = 0xffffff;
 		const intensity = 0.9;
-		const light = new THREE.DirectionalLight(color, intensity);
-		light.position.set(0, 40, 0);
+		const light = new THREE.PointLight(color, intensity);
+		light.position.set(0, 100, 0);
 		this._scene.add(light);
-
+        this.debugPoint({x:0,y:50, z : 0})
         light.castShadow = true;
         light.shadow.mapSize.width = light.shadow.mapSize.height = 2048;
         light.shadow.camera.left = light.shadow.camera.bottom = -100;
@@ -405,7 +399,7 @@ class App {
 
 	update() {
 		this.time += this.step
-		
+		this.time2 += this.step
         const deltaTime = this._clock.getDelta();
         this.mixer.update(deltaTime);
         // if(this.beeArr[0]){
@@ -444,21 +438,20 @@ class App {
                 })
             }
         }
+        
         if(this.flyFlag && this.once){
-            for(let bee of this.beeArr){
-                bee.theta = Math.atan(bee.position.z / bee.position.x);
-                bee.radius = Math.hypot(bee.position.x, bee.position.z);
-            }
-            this.once = false;
-            this.time = 0
-        }
-        if(this.flyFlag ){
             
             for(let bee of this.beeArr){
-                bee.position.x = bee.radius * Math.cos(this.time + bee.theta)
-                bee.position.z = bee.radius * Math.sin(this.time + bee.theta)
-                bee.rotation.y = Math.atan(this.time + bee.theta + Math.PI/2)
-                console.log(bee.rotation)
+                bee.tempY = bee.position.y;
+                bee.random = this.randRange(0,1);
+            }
+            this.once = false;
+            
+        }
+        if(this.flyFlag){
+            for(let bee of this.beeArr){
+                
+                bee.position.y = Math.sin(this.time * bee.random) + bee.tempY
             }
         }
 
