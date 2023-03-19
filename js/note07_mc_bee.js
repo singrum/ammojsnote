@@ -107,7 +107,7 @@ class App {
     }
     addClone(obj){
         
-        const LVRange = [0,20]
+        const LVRange = [10,20]
         const YRange = [30,50]
         const AVRange = [0,5]
         
@@ -116,20 +116,20 @@ class App {
         const animationClip = this.beeGltf.animations[0];
 
         const clone = this.group.clone();
-        const animationAction = this.mixer.clipAction(animationClip);
-        animationAction.clampWhenFinished = true;
-        animationAction.loop = THREE.LoopOnce;
-        animationAction.reset();
-        animationAction.play();
-        animationAction.paused = true;
-        animationAction.time = 0;
+        // const animationAction = this.mixer.clipAction(animationClip);
+        // animationAction.clampWhenFinished = true;
+        // animationAction.loop = THREE.LoopOnce;
+        // animationAction.reset();
+        // animationAction.play();
+        // animationAction.paused = true;
+        // animationAction.time = 0;
     
-        animationAction.setEffectiveTimeScale(1);
-        animationAction.setEffectiveWeight(1);
-        animationAction.setLoop(THREE.LoopOnce, 0);
+        // animationAction.setEffectiveTimeScale(1);
+        // animationAction.setEffectiveWeight(1);
+        // animationAction.setLoop(THREE.LoopOnce, 0);
     
-        animationAction.play();
-        animationAction.paused = false;
+        // animationAction.play();
+        // animationAction.paused = false;
     
         this.mixer.clipAction(animationClip, clone).play();
         
@@ -251,7 +251,7 @@ class App {
 
     _createTable(){
         
-        const scale = {x:100, y:0.5, z: 100};
+        const scale = {x:1000, y:0.5, z: 1000};
         const position = {x: 0, y: -scale.y / 2, z: 0};
 
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(scale.x, scale.z), new THREE.MeshBasicMaterial({visible: false}));
