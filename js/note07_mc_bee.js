@@ -205,7 +205,7 @@ class App {
 
             const physicsWorld = new Ammo.btDiscreteDynamicsWorld(
                 dispatcher, overlappingPairCache, solver, collisionConfiguration);
-            physicsWorld.setGravity(new Ammo.btVector3(0, -50, 0));
+            physicsWorld.setGravity(new Ammo.btVector3(0, -100, 0));
 
             this._physicsWorld = physicsWorld;
             this._setupModel();
@@ -216,8 +216,8 @@ class App {
 		const controls = new OrbitControls(this._camera, this._divContainer);
         controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
         controls.dampingFactor = 0.05;
-        controls.minDistance = 100;
-        controls.maxDistance = 500;
+        controls.minDistance = 50;
+        controls.maxDistance = 200;
         controls.screenSpacePanning = false;
         controls.maxPolarAngle = Math.PI / 2;
 
@@ -310,19 +310,40 @@ class App {
 	}
 
     _createTable(){
+        const texture = new THREE.TextureLoader().load( '../src/grass.png' );
+        texture.magFilter = THREE.NearestFilter;
         
+
         const scale = {x:1000, y:0.5, z: 1000};
         const position = {x: 0, y: -scale.y / 2, z: 0};
 
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(scale.x, scale.z), new THREE.MeshBasicMaterial({visible: false}));
-        plane.position.set(position.x, position.y + scale.y / 2, position.z)
-        plane.rotation.x = THREE.MathUtils.degToRad(-90);
-        this._scene.add(plane)
-        this._plane = plane
+        // const plane = new THREE.Mesh(new THREE.PlaneGeometry(scale.x, scale.z), new THREE.MeshBasicMaterial({visible: false}));
+        // plane.position.set(position.x, position.y + scale.y / 2, position.z)
+        // plane.rotation.x = THREE.MathUtils.degToRad(-90);
+        // this._scene.add(plane)
+        // this._plane = plane
         
+        const blockWidth = 20;
+        const blockGeometry = new THREE.BoxGeometry(blockWidth,blockWidth,blockWidth);
+        const blockMaterial = new THREE.MeshLambertMaterial({ map: texture, side: THREE.DoubleSide });
+        const block = new THREE.Mesh(blockGeometry, blockMaterial);
+        block.position.set(0,-10,0)
+        this._scene.add(block)
 
+        for(let i = -5; i<5; i++){
+            for(let j = -5;j<5;j++){
+                const clone = block.clone();
+                clone.position.set(blockWidth * i, -blockWidth/2, blockWidth * j)
+                this._scene.add(clone)
+
+            }
+        }
+
+
+
+        
         const tableGeometry = new THREE.BoxGeometry();
-        const tableMaterial = new THREE.MeshPhongMaterial({color: 0x878787});
+        const tableMaterial = new THREE.MeshLambertMaterial({ visible : false});
         const table = new THREE.Mesh(tableGeometry, tableMaterial);
         
         
@@ -370,7 +391,7 @@ class App {
 		const light = new THREE.PointLight(color, intensity);
 		light.position.set(0, 100, 0);
 		this._scene.add(light);
-        this.debugPoint({x:0,y:50, z : 0})
+        
         light.castShadow = true;
         light.shadow.mapSize.width = light.shadow.mapSize.height = 2048;
         light.shadow.camera.left = light.shadow.camera.bottom = -100;
@@ -443,7 +464,7 @@ class App {
             
             for(let bee of this.beeArr){
                 bee.tempY = bee.position.y;
-                bee.random = this.randRange(0,1);
+                bee.random = this.randRange(0.5,1);
                 bee.random2 = this.randRange(1,1.5)
             }
             this.once = false;
