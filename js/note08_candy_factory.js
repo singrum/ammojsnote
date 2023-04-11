@@ -94,8 +94,22 @@ class App {
 		this._scene.add(points)
 	}
 	_setupModel() {
-        const outerLid = new THREE.Mesh( new THREE.RingGeometry( 0.9, 1, 32 ), new THREE.MeshBasicMaterial( { color: 0xffff00} ) );
-        this.scene.add(outerLid)
+        const outerLid = new THREE.Mesh( new THREE.RingGeometry( 0.9, 1, 32 ), new THREE.MeshPhysicalMaterial( { color: 0xffff00} ) );
+        const innerLid = new THREE.Mesh( new THREE.CircleGeometry( 0.9, 32 ), new THREE.MeshPhysicalMaterial( { color: 0xffffff } ));
+        const candyLid = new THREE.Object3D();
+        candyLid.add(outerLid, innerLid)
+        
+        const candyCylinder = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 32), new THREE.MeshPhysicalMaterial({color : 0xffff00}));
+        const candy = new THREE.Object3D();
+        const topLid = candyLid.clone();
+        const bottomLid = candyLid.clone();
+        candy.add(candyCylinder, topLid, bottomLid);
+        topLid.position.y = 0.5;
+        bottomLid.position.y = -0.5;
+        
+
+        
+
 
 	}
 
