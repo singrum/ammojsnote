@@ -60,7 +60,7 @@ class App {
     }
 
     _setupBackground(){
-        this._scene.background = new THREE.Color(0xD6CDA4);
+        this._scene.background = new THREE.Color(0x7C96AB);
 
     }
 	_setupControls(){ 
@@ -72,11 +72,12 @@ class App {
 		const width = this._divContainer.clientWidth;
 		const height = this._divContainer.clientHeight;
 		const aspectRatio = window.innerWidth / window.innerHeight;
-		const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+		const camera = new THREE.OrthographicCamera( -aspectRatio * width / 2, aspectRatio * width / 2, width / 2, -width /2, 0.000001, 100000 );
 		
-		camera.position.set(20,20,20)
+		camera.position.set(10,10,10)z
+		camera.zoom = 6
 		camera.lookAt(0,0,0)
-		// camera.zoom = 0.1
+		
 		this._camera = camera;
         this._scene.add(this._camera)
 	}
@@ -91,20 +92,20 @@ class App {
 		const plateMaterial = new THREE.MeshPhysicalMaterial( { color: 0xffff00, transparent : true, opacity : 0.2} );
 		const plate = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), plateMaterial);
 		const floor = new THREE.Mesh(new THREE.BoxGeometry(w,w,d), plateMaterial);
-		
+		const transition = 10
 		const front = plate.clone();
-		front.position.set(0 + 5, - h / 2 - 3, w / 2 + d / 2);
+		front.position.set(0 + transition, - h / 2 - 3, w / 2 + d / 2);
 		const right = plate.clone();
-		right.position.set(w / 2 + d / 2+ 5, - h / 2 - 3, 0);
+		right.position.set(w / 2 + d / 2+ transition, - h / 2 - 3, 0);
 		right.rotation.set(0,Math.PI / 2, 0);
 		const back = plate.clone();
-		back.position.set(0+ 5, - h / 2 - 3, - w / 2 - d / 2);
+		back.position.set(0+ transition, - h / 2 - 3, - w / 2 - d / 2);
 		back.rotation.set(0,Math.PI, 0);
 		const left = plate.clone();
-		left.position.set(-w / 2 - d / 2+ 5, - h / 2 - 3, 0 );
+		left.position.set(-w / 2 - d / 2+ transition, - h / 2 - 3, 0 );
 		left.rotation.set(0,-Math.PI / 2, 0);
 
-		floor.position.set(0+ 5, -h - d / 2 - 3, 0);
+		floor.position.set(0+ transition, -h - d / 2 - 3, 0);
 		floor.rotation.set(Math.PI / 2,0, 0);
 		floor.name = "floor"
 		
@@ -120,6 +121,7 @@ class App {
 			}
 			
 		})
+		
 	}
 
 	setPhysicsOnPlate(obj,w,h,d){
@@ -168,7 +170,7 @@ class App {
 		// const light = new THREE.DirectionalLight(color, 1);
 
 		const pointLight = new THREE.PointLight(color, 1);
-		pointLight.position.set(0,10,0)
+		pointLight.position.set(3,10,0)
 		this._scene.add(pointLight)
 		
 
@@ -208,7 +210,7 @@ class App {
 		const baseTween = new TWEEN.Tween(this.baseSet.position).to({x : maxOverhang}, 1000).start()
 
 		const cutterTweenDown = new TWEEN.Tween(this.cutter.position)
-		.to({y : 2}, 100)
+		.to({y : -1}, 100)
 		.onStart(()=>{
 			this.cutterTweenFin = false;
 		})
@@ -220,7 +222,7 @@ class App {
 			
 		});
 		const cutterTweenUp = new TWEEN.Tween(this.cutter.position)
-		.to({y : 4}, 100)
+		.to({y : 1}, 100)
 		.onComplete(()=>{
 
 			baseTween.start();
@@ -277,7 +279,7 @@ class App {
 	}
 
 	_setupModel() {
-		const candyRadius = 0.8;
+		const candyRadius =1;
 		this.candyRadius = candyRadius
         const outerLid = new THREE.Mesh( new THREE.RingGeometry( candyRadius * 0.8, candyRadius, 32 ), new THREE.MeshPhysicalMaterial( { color: 0xffff00} ) );
 		outerLid.name = "outerLid"
@@ -345,14 +347,33 @@ class App {
 		
 		const cutterWidth = 10;
 		const cutterHeight = 5;
+		const metalMaterial = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 0.2, metalness : 0.7, flatShading : false});
+		const cutter = new THREE.Object3D();
+		cutter.add(new THREE.Mesh(new THREE.PlaneGeometry( cutterWidth, cutterHeight),metalMaterial))
+		cutter.children[0].position.y = cutterHeight / 2
 		
-		const cutter = new THREE.Mesh(new THREE.PlaneGeometry( cutterWidth, cutterHeight),new THREE.MeshPhysicalMaterial({color : 0x555555, roughness : roughness, metalness : metalness}));
 		cutter.rotation.y = Math.PI/2
-		cutter.position.y = 4
+		cutter.position.y =1
 		this._scene.add(cutter)
 		this.cutter = cutter
 		
-
+		//conveyer
+		const conveyerWidth = 30;
+		const conveyerHeight = 2;
+		const conveyerDepth = 20
+		const shape = new THREE.Shape();
+		shape.arc(conveyerWidth / 2,0, conveyerHeight / 2, Math.PI/2, 3 * Math.PI/2, true);
+		shape.arc(-2*conveyerWidth / 2,conveyerHeight / 2, conveyerHeight / 2, -Math.PI/2, -3 * Math.PI/2, true);
+		const extrudeSettings = {
+			bevelSize : 0,
+			bevelThickness : 0,
+			depth: conveyerDepth,
+		};
+		
+		const conveyer = new THREE.Mesh( new THREE.ExtrudeGeometry( shape, extrudeSettings ), metalMaterial)
+		conveyer.position.set(-conveyerWidth / 2,-2,- conveyerDepth /2)
+		
+		this._scene.add(conveyer);
 
 
 
