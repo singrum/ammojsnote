@@ -74,7 +74,7 @@ class App {
 		const aspectRatio = window.innerWidth / window.innerHeight;
 		const camera = new THREE.OrthographicCamera( -aspectRatio * width / 2, aspectRatio * width / 2, width / 2, -width /2, 0.000001, 100000 );
 		
-		camera.position.set(10,10,10)z
+		camera.position.set(10,10,10)
 		camera.zoom = 6
 		camera.lookAt(0,0,0)
 		
