@@ -81,38 +81,6 @@ class App {
         this._scene.add(this._camera)
 	}
 
-	// _setupTable(){
-
-    //     const scale = {x:1000, y:0.5, z: 1000};
-    //     const position = {x: 0, y: -scale.y / 2 - 10, z: 0};
-        
-    //     const tableGeometry = new THREE.BoxGeometry();
-    //     const tableMaterial = new THREE.MeshLambertMaterial({ visible : false});
-    //     const table = new THREE.Mesh(tableGeometry, tableMaterial);
-                
-    //     table.position.set(position.x, position.y, position.z);
-    //     table.scale.set(scale.x, scale.y, scale.z);
-        
-    //     this._scene.add(table)
-    //     this._table = table;
-
-    //     const transform = new Ammo.btTransform();
-    //     const quaternion = {x: 0, y: 0, z: 0, w: 1};
-    //     transform.setIdentity();
-    //     transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
-    //     transform.setRotation(
-    //         new Ammo.btQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w));
-    //     const motionState = new Ammo.btDefaultMotionState(transform);
-    //     const colShape = new Ammo.btBoxShape(
-    //         new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
-
-    //     const mass = 0;
-    //     colShape.calculateLocalInertia(mass);
-    //     const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape);
-    //     const body = new Ammo.btRigidBody(rbInfo);
-    //     body.setRestitution(0.3)
-    //     this._physicsWorld.addRigidBody(body)
-	// }
 
 
 	_setupBox(){
@@ -311,9 +279,9 @@ class App {
 	_setupModel() {
 		const candyRadius = 0.8;
 		this.candyRadius = candyRadius
-        const outerLid = new THREE.Mesh( new THREE.RingGeometry( candyRadius * 0.9, candyRadius, 32 ), new THREE.MeshPhysicalMaterial( { color: 0xffff00} ) );
+        const outerLid = new THREE.Mesh( new THREE.RingGeometry( candyRadius * 0.8, candyRadius, 32 ), new THREE.MeshPhysicalMaterial( { color: 0xffff00} ) );
 		outerLid.name = "outerLid"
-        const innerLid = new THREE.Mesh( new THREE.CircleGeometry( candyRadius * 0.9, 32 ), new THREE.MeshPhysicalMaterial( { color: 0xffffff } ));
+        const innerLid = new THREE.Mesh( new THREE.CircleGeometry( candyRadius * 0.8, 32 ), new THREE.MeshPhysicalMaterial( { color: 0xffffff } ));
         const candyLid = new THREE.Object3D();
 		
         candyLid.add(outerLid, innerLid)
@@ -323,8 +291,10 @@ class App {
         const candy = new THREE.Object3D();
         const topLid = candyLid.clone();
 		topLid.rotation.x = -Math.PI/2
+		topLid.name = "topLid"
         const bottomLid = candyLid.clone();
 		bottomLid.rotation.x = Math.PI/2
+		bottomLid.name = "bottomLid"
         candy.add(candyCylinder, topLid, bottomLid);
         topLid.position.y = 0.5;
         bottomLid.position.y = -0.5;
@@ -338,9 +308,19 @@ class App {
 			new THREE.MeshPhysicalMaterial( { color: 0xFF8E00, roughness : roughness, metalness :metalness} )]
 
 		for(let i = 0;i<3;i++){
-			candyArr[i].getObjectByName("outerLid").material = materialArr[i]
+			let currTopLid = candyArr[i].getObjectByName("topLid");
+			currTopLid = topLid.clone();
+			currTopLid.material = materialArr[i]
+			
+			let currBottomLid = candyArr[i].getObjectByName("bottomLid");
+			currBottomLid = bottomLid.clone();
+			currBottomLid.material = materialArr[i]
+			candyArr[i].getObjectsByProperty("name", "outerLid").forEach(obj => obj.material =  materialArr[i])
+			
+			
 			candyArr[i].getObjectByName("candyCylinder").material = materialArr[i]
 		}
+		
 		
         
 		
