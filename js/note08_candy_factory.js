@@ -93,7 +93,7 @@ class App {
 		const plate = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), plateMaterial);
 		const floor = new THREE.Mesh(new THREE.BoxGeometry(w,w,d), plateMaterial);
 		const transitionX = w/2
-		const transitionY = -1
+		const transitionY = -3
 		const front = plate.clone();
 		front.position.set(0 + transitionX, - h / 2 +transitionY, w / 2 + d / 2);
 		const right = plate.clone();
@@ -103,6 +103,14 @@ class App {
 		back.position.set(0+ transitionX, - h / 2 +transitionY, - w / 2 - d / 2);
 		back.rotation.set(0,Math.PI, 0);
 		const left = plate.clone();
+		
+		left.material =  new THREE.MeshPhysicalMaterial({			color: 0xffffff,
+			metalness: .1,
+			roughness:0.05,
+			ior: 1.4, // 1(진공) , 1.00029(공기), 1.4~1.7(유리), 2.419(다이아몬드)
+			thickness: 0.2,
+			transmission: 1,
+			side: THREE.DoubleSide})
 		left.position.set(-w / 2 - d / 2+ transitionX, - h / 2 +transitionY, 0 );
 		left.rotation.set(0,-Math.PI / 2, 0);
 
@@ -124,8 +132,8 @@ class App {
 		})
 
 		const metalMaterial = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 0.2, metalness : 0.7, flatShading : false, side : THREE.DoubleSide});
-		const metalTransparent = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 0.2, metalness : 0.7, flatShading : false, side : THREE.DoubleSide, transparent : true, opacity : 0.2});
-		const boxWall = new THREE.Mesh(new THREE.PlaneGeometry( w, h),metalMaterial)
+		const metalTransparent = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 1, metalness : 0, flatShading : false, side : THREE.DoubleSide, transparent : true, opacity : 0.5});
+		const boxWall = new THREE.Mesh(new THREE.PlaneGeometry( w, h),metalTransparent)
 		const boxfloor = new THREE.Mesh(new THREE.PlaneGeometry( w, w),metalMaterial)
 		const realbox = new THREE.Object3D()
 		realbox.add(boxWall.clone(),boxWall.clone(),boxWall.clone(),boxWall.clone(), boxfloor.clone())		
@@ -224,8 +232,8 @@ class App {
 		this._divContainer.addEventListener( 'pointerdown', onPointerDown );
 	}
 	_setupTween(){
-		const maxOverhang = 20;
-		const baseTween = new TWEEN.Tween(this.baseSet.position).to({x : maxOverhang}, 2000).start()
+		const maxOverhang = 15;
+		const baseTween = new TWEEN.Tween(this.baseSet.position).to({x : maxOverhang}, 1500).start()
 
 		const cutterTweenDown = new TWEEN.Tween(this.cutter.position)
 		.to({y : -1}, 100)
