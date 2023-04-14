@@ -405,7 +405,7 @@ class App {
 		
 		this._scene.add(baseSet)
 		this.baseSet = baseSet
-		baseSet.traverse( function ( objectx ) {
+		baseSet.traverse( function ( object ) {
 
 			if ( object.isMesh ) {
 		
