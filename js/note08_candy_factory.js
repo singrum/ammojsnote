@@ -145,6 +145,7 @@ class App {
 		realbox.children[2].position.set(transitionX, -h/2 +transitionY, -w/2)
 		realbox.children[3].position.set(- w/2 + transitionX, -h/2 +transitionY, 0)
 		realbox.children[4].position.set(transitionX,-h+transitionY,0)
+		realbox.children[4].receiveShadow = true;
 		this._scene.add(realbox)
 		
 		
@@ -186,17 +187,20 @@ class App {
 
 		const light = new THREE.DirectionalLight(color, 0.7);
 		
-		light.castShadow = true;
-		light.shadow.camera.top = light.shadow.camera.right = 1000;
-		light.shadow.camera.bottom = light.shadow.camera.left = -1000;
-		light.shadow.mapSize.width = light.shadow.mapSize.height = 2048 // 텍스쳐 맵 픽셀 수 증가 -> 선명
-		light.shadow.radius = 1;
 		light.position.set(10, 20, 20);
 		this._scene.add(light);
 		// const light = new THREE.DirectionalLight(color, 1);
+		const dlight2 = new THREE.DirectionalLight(color, 0.7);;
+		dlight2.position.set(10, -20, 20);
+		this._scene.add(dlight2);
 
 		const pointLight = new THREE.PointLight(color, 1);
-		pointLight.position.set(3,10,0)
+		pointLight.position.set(3,40,0)
+		pointLight.castShadow = true;
+		pointLight.shadow.camera.top = pointLight.shadow.camera.right = 1000;
+		pointLight.shadow.camera.bottom = pointLight.shadow.camera.left = -1000;
+		pointLight.shadow.mapSize.width = pointLight.shadow.mapSize.height = 512 // 텍스쳐 맵 픽셀 수 증가 -> 선명
+		pointLight.shadow.radius = 3;
 		this._scene.add(pointLight)
 		
 
@@ -273,6 +277,15 @@ class App {
 			this.physicsMesh.push(e)
 			e.physicsBody.setLinearVelocity( new Ammo.btVector3( 15, this.randRange(0,5), 0))
 			e.physicsBody.setAngularVelocity(new Ammo.btVector3(this.randRange(-1,1),this.randRange(-1,1),this.randRange(-2,2)))
+			e.traverse( function ( object ) {
+
+				if ( object.isMesh ) {
+			
+					object.castShadow = true;
+					object.receiveShadow =true;
+				}
+			
+			} );
 		})
 
 		
@@ -346,7 +359,8 @@ class App {
 		
 		const roughness =0.2;
 		const metalness = 0.4;
-		const materialArr = [new THREE.MeshPhysicalMaterial( { color: 0xFB7AFC, roughness : roughness, metalness : metalness} ) ,
+		const materialArr = [
+			new THREE.MeshPhysicalMaterial( { color: 0xFB7AFC, roughness : roughness, metalness : metalness} ) ,
 			new THREE.MeshPhysicalMaterial( { color: 0xD2E603, roughness : roughness, metalness : metalness} ),
 			new THREE.MeshPhysicalMaterial( { color: 0xFF8E00, roughness : roughness, metalness :metalness} )]
 
@@ -391,6 +405,15 @@ class App {
 		
 		this._scene.add(baseSet)
 		this.baseSet = baseSet
+		baseSet.traverse( function ( object ) {
+
+			if ( object.isMesh ) {
+		
+				object.castShadow = true;
+		
+			}
+		
+		} );
         
 		
 		const cutterWidth = 10;
@@ -420,7 +443,7 @@ class App {
 		
 		const conveyer = new THREE.Mesh( new THREE.ExtrudeGeometry( shape, extrudeSettings ), metalMaterial)
 		conveyer.position.set(-conveyerWidth / 2,-2,- conveyerDepth /2)
-		
+		conveyer.receiveShadow = true;
 		this._scene.add(conveyer);
 
 
