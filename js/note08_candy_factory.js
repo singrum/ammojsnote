@@ -199,7 +199,7 @@ class App {
 		pointLight.castShadow = true;
 		pointLight.shadow.camera.top = pointLight.shadow.camera.right = 1000;
 		pointLight.shadow.camera.bottom = pointLight.shadow.camera.left = -1000;
-		pointLight.shadow.mapSize.width = pointLight.shadow.mapSize.height = 1024 // 텍스쳐 맵 픽셀 수 증가 -> 선명
+		pointLight.shadow.mapSize.width = pointLight.shadow.mapSize.height = 512 // 텍스쳐 맵 픽셀 수 증가 -> 선명
 		pointLight.shadow.radius = 3;
 		this._scene.add(pointLight)
 		
@@ -333,7 +333,7 @@ class App {
 		
 
 		
-		const innerLid = new THREE.Mesh( new THREE.CircleGeometry( candyRadius * 0.8, 32 ), new THREE.MeshBasicMaterial());
+		const innerLid = new THREE.Mesh( new THREE.CircleGeometry( candyRadius * 0.8, 32 ), new THREE.MeshPhysicalMaterial());
 		innerLid.name = "innerLid"
 		
 
@@ -377,7 +377,7 @@ class App {
 			candyArr[i].getObjectsByProperty("name", "outerLid").forEach(obj => obj.material =  materialArr[i])
 			
 
-			candyArr[i].getObjectsByProperty("name","innerLid").forEach(obj => obj.material =  new THREE.MeshPhysicsMaterial({ map: textures[i] }))
+			candyArr[i].getObjectsByProperty("name","innerLid").forEach(obj => {obj.material =  new THREE.MeshPhysicalMaterial({ map: textures[i] });})
 
 			// innerLid.material = new THREE.MeshBasicMaterial({ map: textures[i] })
 			// console.log(innerLid)
