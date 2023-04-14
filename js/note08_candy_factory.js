@@ -237,10 +237,10 @@ class App {
 	}
 	_setupTween(){
 		const maxOverhang = 15;
-		const baseTween = new TWEEN.Tween(this.baseSet.position).to({x : maxOverhang}, 1500).start()
+		const baseTween = new TWEEN.Tween(this.baseSet.position).to({x : maxOverhang}, 2000).start()
 
 		const cutterTweenDown = new TWEEN.Tween(this.cutter.position)
-		.to({y : -1}, 100)
+		.to({y : -1}, 500)
 		.onStart(()=>{
 			this.cutterTweenFin = false;
 		})
@@ -252,7 +252,7 @@ class App {
 			
 		});
 		const cutterTweenUp = new TWEEN.Tween(this.cutter.position)
-		.to({y : 1}, 100)
+		.to({y : 1}, 500)
 		.onComplete(()=>{
 
 			baseTween.start();
