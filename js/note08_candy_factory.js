@@ -191,7 +191,7 @@ class App {
 		this._scene.add(light);
 		// const light = new THREE.DirectionalLight(color, 1);
 		const dlight2 = new THREE.DirectionalLight(color, 0.7);;
-		dlight2.position.set(10, -20, 20);
+		dlight2.position.set(5, -20, 10);
 		this._scene.add(dlight2);
 
 		const pointLight = new THREE.PointLight(color, 1);
