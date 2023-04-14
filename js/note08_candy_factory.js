@@ -64,7 +64,7 @@ class App {
 
     }
 	_setupControls(){ 
-		new OrbitControls(this._camera, this._divContainer);
+		// new OrbitControls(this._camera, this._divContainer);
 	}
 	
 
@@ -74,9 +74,9 @@ class App {
 		const aspectRatio = window.innerWidth / window.innerHeight;
 		const camera = new THREE.OrthographicCamera( -aspectRatio * width / 2, aspectRatio * width / 2, width / 2, -width /2, 0.000001, 100000 );
 		
-		camera.position.set(30,30,30)
+		camera.position.set(35,30,35)
 		camera.zoom = 7
-		camera.lookAt(0,0,0)
+		camera.lookAt(5,0,5)
 		
 		this._camera = camera;
         this._scene.add(this._camera)
@@ -199,7 +199,7 @@ class App {
 		pointLight.castShadow = true;
 		pointLight.shadow.camera.top = pointLight.shadow.camera.right = 1000;
 		pointLight.shadow.camera.bottom = pointLight.shadow.camera.left = -1000;
-		pointLight.shadow.mapSize.width = pointLight.shadow.mapSize.height = 512 // 텍스쳐 맵 픽셀 수 증가 -> 선명
+		pointLight.shadow.mapSize.width = pointLight.shadow.mapSize.height = 1024 // 텍스쳐 맵 픽셀 수 증가 -> 선명
 		pointLight.shadow.radius = 3;
 		this._scene.add(pointLight)
 		
