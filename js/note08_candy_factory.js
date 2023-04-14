@@ -64,7 +64,7 @@ class App {
 
     }
 	_setupControls(){ 
-		new OrbitControls(this._camera, this._divContainer);
+		// new OrbitControls(this._camera, this._divContainer);
 	}
 	
 
@@ -74,8 +74,8 @@ class App {
 		const aspectRatio = window.innerWidth / window.innerHeight;
 		const camera = new THREE.OrthographicCamera( -aspectRatio * width / 2, aspectRatio * width / 2, width / 2, -width /2, 0.000001, 100000 );
 		
-		camera.position.set(100,100,100)
-		camera.zoom = 6
+		camera.position.set(30,30,30)
+		camera.zoom = 7
 		camera.lookAt(0,0,0)
 		
 		this._camera = camera;
@@ -85,15 +85,15 @@ class App {
 
 
 	_setupBox(){
-		const w = 40;
-		const h = 5;
+		const w = 100;
+		const h = 10;
 		const d = 1;
 
 		const plateMaterial = new THREE.MeshPhysicalMaterial( { color: 0xffff00, transparent : true, opacity : 0.2, visible : false} );
 		const plate = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), plateMaterial);
 		const floor = new THREE.Mesh(new THREE.BoxGeometry(w,w,d), plateMaterial);
-		const transitionX = 20
-		const transitionY = -5
+		const transitionX = w/2
+		const transitionY = -1
 		const front = plate.clone();
 		front.position.set(0 + transitionX, - h / 2 +transitionY, w / 2 + d / 2);
 		const right = plate.clone();
