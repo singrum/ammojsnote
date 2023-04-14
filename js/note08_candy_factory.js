@@ -60,7 +60,7 @@ class App {
     }
 
     _setupBackground(){
-        this._scene.background = new THREE.Color(0x7C96AB);
+        this._scene.background = new THREE.Color(0xDDFFBB);
 
     }
 	_setupControls(){ 
@@ -74,7 +74,7 @@ class App {
 		const aspectRatio = window.innerWidth / window.innerHeight;
 		const camera = new THREE.OrthographicCamera( -aspectRatio * width / 2, aspectRatio * width / 2, width / 2, -width /2, 0.000001, 100000 );
 		
-		camera.position.set(10,10,10)
+		camera.position.set(100,100,100)
 		camera.zoom = 6
 		camera.lookAt(0,0,0)
 		
@@ -85,27 +85,28 @@ class App {
 
 
 	_setupBox(){
-		const w = 20;
-		const h = 10;
+		const w = 40;
+		const h = 5;
 		const d = 1;
 
-		const plateMaterial = new THREE.MeshPhysicalMaterial( { color: 0xffff00, transparent : true, opacity : 0.2} );
+		const plateMaterial = new THREE.MeshPhysicalMaterial( { color: 0xffff00, transparent : true, opacity : 0.2, visible : false} );
 		const plate = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), plateMaterial);
 		const floor = new THREE.Mesh(new THREE.BoxGeometry(w,w,d), plateMaterial);
-		const transition = 10
+		const transitionX = 20
+		const transitionY = -5
 		const front = plate.clone();
-		front.position.set(0 + transition, - h / 2 - 3, w / 2 + d / 2);
+		front.position.set(0 + transitionX, - h / 2 +transitionY, w / 2 + d / 2);
 		const right = plate.clone();
-		right.position.set(w / 2 + d / 2+ transition, - h / 2 - 3, 0);
+		right.position.set(w / 2 + d / 2+ transitionX, - h / 2 +transitionY, 0);
 		right.rotation.set(0,Math.PI / 2, 0);
 		const back = plate.clone();
-		back.position.set(0+ transition, - h / 2 - 3, - w / 2 - d / 2);
+		back.position.set(0+ transitionX, - h / 2 +transitionY, - w / 2 - d / 2);
 		back.rotation.set(0,Math.PI, 0);
 		const left = plate.clone();
-		left.position.set(-w / 2 - d / 2+ transition, - h / 2 - 3, 0 );
+		left.position.set(-w / 2 - d / 2+ transitionX, - h / 2 +transitionY, 0 );
 		left.rotation.set(0,-Math.PI / 2, 0);
 
-		floor.position.set(0+ transition, -h - d / 2 - 3, 0);
+		floor.position.set(0+ transitionX, -h - d / 2 +transitionY, 0);
 		floor.rotation.set(Math.PI / 2,0, 0);
 		floor.name = "floor"
 		
@@ -121,6 +122,23 @@ class App {
 			}
 			
 		})
+
+		const metalMaterial = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 0.2, metalness : 0.7, flatShading : false, side : THREE.DoubleSide});
+		const metalTransparent = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 0.2, metalness : 0.7, flatShading : false, side : THREE.DoubleSide, transparent : true, opacity : 0.2});
+		const boxWall = new THREE.Mesh(new THREE.PlaneGeometry( w, h),metalMaterial)
+		const boxfloor = new THREE.Mesh(new THREE.PlaneGeometry( w, w),metalMaterial)
+		const realbox = new THREE.Object3D()
+		realbox.add(boxWall.clone(),boxWall.clone(),boxWall.clone(),boxWall.clone(), boxfloor.clone())		
+		realbox.children[1].rotation.y = Math.PI/2;
+		realbox.children[3].rotation.y = Math.PI/2;
+		realbox.children[4].rotation.x = Math.PI/2
+		realbox.children[0].position.set(transitionX, -h/2 +transitionY, w/2)
+		realbox.children[1].position.set(w/2 + transitionX, -h/2 +transitionY, 0)
+		realbox.children[2].position.set(transitionX, -h/2 +transitionY, -w/2)
+		realbox.children[3].position.set(- w/2 + transitionX, -h/2 +transitionY, 0)
+		realbox.children[4].position.set(transitionX,-h+transitionY,0)
+		this._scene.add(realbox)
+		
 		
 	}
 
@@ -206,8 +224,8 @@ class App {
 		this._divContainer.addEventListener( 'pointerdown', onPointerDown );
 	}
 	_setupTween(){
-		const maxOverhang = 10;
-		const baseTween = new TWEEN.Tween(this.baseSet.position).to({x : maxOverhang}, 1000).start()
+		const maxOverhang = 20;
+		const baseTween = new TWEEN.Tween(this.baseSet.position).to({x : maxOverhang}, 2000).start()
 
 		const cutterTweenDown = new TWEEN.Tween(this.cutter.position)
 		.to({y : -1}, 100)
@@ -245,8 +263,8 @@ class App {
 			this.setPhysics(e)
 			this._scene.add(e)
 			this.physicsMesh.push(e)
-			e.physicsBody.setLinearVelocity( new Ammo.btVector3( 10, 0, 0))
-			e.physicsBody.setAngularVelocity(new Ammo.btVector3(this.randRange(-0.5,0.5),this.randRange(-0.5,0.5),this.randRange(-2,2)))
+			e.physicsBody.setLinearVelocity( new Ammo.btVector3( 15, this.randRange(0,5), 0))
+			e.physicsBody.setAngularVelocity(new Ammo.btVector3(this.randRange(-1,1),this.randRange(-1,1),this.randRange(-2,2)))
 		})
 
 		
