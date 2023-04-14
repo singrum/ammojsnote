@@ -267,7 +267,7 @@ class App {
 		candyPieces.forEach((e,i) => {
 			e.position.set(overhang / 2, 0, (i - 1 ) * this.candyRadius * 2)
 			e.scale.y = overhang;
-			e.rotation.z = Math.PI/2
+			e.rotation.z = -Math.PI/2
 			this.setPhysics(e)
 			this._scene.add(e)
 			this.physicsMesh.push(e)
@@ -309,7 +309,22 @@ class App {
 		this.candyRadius = candyRadius
         const outerLid = new THREE.Mesh( new THREE.RingGeometry( candyRadius * 0.8, candyRadius, 32 ), new THREE.MeshPhysicalMaterial( { color: 0xffff00} ) );
 		outerLid.name = "outerLid"
-        const innerLid = new THREE.Mesh( new THREE.CircleGeometry( candyRadius * 0.8, 32 ), new THREE.MeshPhysicalMaterial( { color: 0xffffff } ));
+		const textureLoader = new THREE.TextureLoader();
+		const textures = [textureLoader.load('../src/smile.jpg'),textureLoader.load('../src/sad.jpg'), textureLoader.load('../src/surp.jpg') ]
+		textures.forEach(texture=>{texture.minFilter = THREE.NearestFilter;
+		texture.magFilter = THREE.NearestFilter;
+		texture.generateMipmaps = false;
+		texture.center = new THREE.Vector2(0.5,0.5);
+		texture.rotation = Math.PI/2
+	})
+		
+
+		
+		const innerLid = new THREE.Mesh( new THREE.CircleGeometry( candyRadius * 0.8, 32 ), new THREE.MeshBasicMaterial());
+		innerLid.name = "innerLid"
+		
+
+
         const candyLid = new THREE.Object3D();
 		
         candyLid.add(outerLid, innerLid)
@@ -336,15 +351,22 @@ class App {
 			new THREE.MeshPhysicalMaterial( { color: 0xFF8E00, roughness : roughness, metalness :metalness} )]
 
 		for(let i = 0;i<3;i++){
-			let currTopLid = candyArr[i].getObjectByName("topLid");
-			currTopLid = topLid.clone();
-			currTopLid.material = materialArr[i]
+			// let currTopLid = candyArr[i].getObjectByName("topLid");
+			// currTopLid = topLid.clone();
+			// currTopLid.material = materialArr[i]
+
+
 			
-			let currBottomLid = candyArr[i].getObjectByName("bottomLid");
-			currBottomLid = bottomLid.clone();
-			currBottomLid.material = materialArr[i]
+			// let currBottomLid = candyArr[i].getObjectByName("bottomLid");
+			// currBottomLid = bottomLid.clone();
+			// currBottomLid.material = materialArr[i]
 			candyArr[i].getObjectsByProperty("name", "outerLid").forEach(obj => obj.material =  materialArr[i])
 			
+
+			candyArr[i].getObjectsByProperty("name","innerLid").forEach(obj => obj.material =  new THREE.MeshBasicMaterial({ map: textures[i] }))
+
+			// innerLid.material = new THREE.MeshBasicMaterial({ map: textures[i] })
+			// console.log(innerLid)
 			
 			candyArr[i].getObjectByName("candyCylinder").material = materialArr[i]
 		}
