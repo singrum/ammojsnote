@@ -64,7 +64,7 @@ class App {
 
     }
 	_setupControls(){ 
-		// new OrbitControls(this._camera, this._divContainer);
+		new OrbitControls(this._camera, this._divContainer);
 	}
 	
 
@@ -110,7 +110,7 @@ class App {
 			ior: 1.4, // 1(진공) , 1.00029(공기), 1.4~1.7(유리), 2.419(다이아몬드)
 			thickness: 0.2,
 			transmission: 1,
-			side: THREE.DoubleSide})
+			})
 		left.position.set(-w / 2 - d / 2+ transitionX, - h / 2 +transitionY, 0 );
 		left.rotation.set(0,-Math.PI / 2, 0);
 
@@ -131,15 +131,15 @@ class App {
 			
 		})
 
-		const metalMaterial = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 0.2, metalness : 0.7, flatShading : false, side : THREE.DoubleSide});
-		const metalTransparent = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 1, metalness : 0, flatShading : false, side : THREE.DoubleSide, transparent : true, opacity : 0.5});
+		const metalMaterial = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 0.2, metalness : 0.7, flatShading : false});
+		const metalTransparent = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 1, metalness : 0, flatShading : false, transparent : true, opacity : 0.5});
 		const boxWall = new THREE.Mesh(new THREE.PlaneGeometry( w, h),metalTransparent)
 		const boxfloor = new THREE.Mesh(new THREE.PlaneGeometry( w, w),metalMaterial)
 		const realbox = new THREE.Object3D()
 		realbox.add(boxWall.clone(),boxWall.clone(),boxWall.clone(),boxWall.clone(), boxfloor.clone())		
 		realbox.children[1].rotation.y = Math.PI/2;
 		realbox.children[3].rotation.y = Math.PI/2;
-		realbox.children[4].rotation.x = Math.PI/2
+		realbox.children[4].rotation.x = -Math.PI/2
 		realbox.children[0].position.set(transitionX, -h/2 +transitionY, w/2)
 		realbox.children[1].position.set(w/2 + transitionX, -h/2 +transitionY, 0)
 		realbox.children[2].position.set(transitionX, -h/2 +transitionY, -w/2)
@@ -405,7 +405,7 @@ class App {
 		
 		this._scene.add(baseSet)
 		this.baseSet = baseSet
-		baseSet.traverse( function ( object ) {
+		baseSet.traverse( function ( objectx ) {
 
 			if ( object.isMesh ) {
 		
@@ -420,8 +420,11 @@ class App {
 		const cutterHeight = 5;
 		const metalMaterial = new THREE.MeshPhysicalMaterial({color : 0xffffff, roughness : 0.2, metalness : 0.7, flatShading : false});
 		const cutter = new THREE.Object3D();
-		cutter.add(new THREE.Mesh(new THREE.PlaneGeometry( cutterWidth, cutterHeight),metalMaterial))
+		cutter.add(new THREE.Mesh(new THREE.PlaneGeometry( cutterWidth, cutterHeight),new THREE.MeshPhysicalMaterial({color : 0xdddddd, roughness : 0.2, metalness : 0, flatShading : false})), new THREE.Mesh(new THREE.CylinderGeometry(1,1,4, 32), new THREE.MeshPhysicalMaterial({color : 0x222222, roughness : 1})))
 		cutter.children[0].position.y = cutterHeight / 2
+		cutter.children[1].position.set(-4/2 + -cutterWidth / 2 ,cutterHeight - 1.4,0)
+		cutter.children[1].rotation.z = Math.PI/2
+		cutter.children[1].scale.x = 1.4
 		
 		cutter.rotation.y = Math.PI/2
 		cutter.position.y =1
