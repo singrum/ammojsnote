@@ -222,19 +222,21 @@ class App {
 		this._scene.add(points)
 	}
 	_setupEvent(){
-		const onPointerDown = ( event ) => {
+		const onTouchStart = ( event ) => {
 			if ( event.isPrimary === false ) return;
-			this.pointerDown = true;
+			this.isTouch = true;
 
-			document.addEventListener( 'pointerup', onPointerUp );
+			this._divContainer.addEventListener( 'touchend', onTouchEnd );
+			
 
 		}
-		const onPointerUp = (event) => {
+		const onTouchEnd = (event) => {
+			
 			if ( event.isPrimary === false ) return;
-			this.pointerDown = false;
-			document.removeEventListener( 'pointerup', onPointerUp );
+			this.isTouch = false;
+			this._divContainer.removeEventListener( 'touchend', onTouchEnd );
 		}
-		this._divContainer.addEventListener( 'pointerdown', onPointerDown );
+		this._divContainer.addEventListener( 'touchstart', onTouchStart );
 	}
 	_setupTween(){
 		const maxOverhang = 15;
@@ -499,7 +501,7 @@ class App {
 	}
 	update() {
 		
-		if(this.cutterTweenFin && this.pointerDown){
+		if(this.cutterTweenFin && this.isTouch){
 			this.cutterTweenDown.start()
 		}
 
