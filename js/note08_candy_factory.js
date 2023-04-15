@@ -223,13 +223,14 @@ class App {
 	}
 	_setupEvent(){
 		const onPointerDown = ( event ) => {
-			
+			if ( event.isPrimary === false ) return;
 			this.pointerDown = true;
 
 			document.addEventListener( 'pointerup', onPointerUp );
 
 		}
 		const onPointerUp = (event) => {
+			if ( event.isPrimary === false ) return;
 			this.pointerDown = false;
 			document.removeEventListener( 'pointerup', onPointerUp );
 		}
