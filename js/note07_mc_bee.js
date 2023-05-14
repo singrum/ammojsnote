@@ -272,8 +272,8 @@ class App {
                 bee.animationAction.paused = true;
                 bee.tween.forEach(e=> e.stop())
             })
-            window.removeEventListener("touchend", touchEnd)
-            window.removeEventListener("mouseup", touchEnd)
+            if ('ontouchstart' in window) window.removeEventListener("touchend", touchEnd)
+            else window.removeEventListener("mouseup", touchEnd)
         }
 
 
@@ -289,8 +289,8 @@ class App {
                 this.isTouch = true;
                 
                 beeFly();
-                window.addEventListener("touchend", touchEnd)
-                window.addEventListener("mouseup", touchEnd)
+                if ('ontouchstart' in window) window.addEventListener("touchend", touchEnd)
+                else window.addEventListener("mouseup", touchEnd)
                 return;
             }
 
@@ -298,10 +298,8 @@ class App {
 
 
         }
-        
-        window.addEventListener("touchstart", touchstartEvent)
-        window.addEventListener("mousedown", touchstartEvent)
-
+        if ('ontouchstart' in window) window.addEventListener("touchstart", touchstartEvent)
+        else window.addEventListener("mousedown", touchstartEvent)
 
 	}
 

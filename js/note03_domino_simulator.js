@@ -72,8 +72,14 @@ class App {
         }
 
         const touchstartEvent = evt=>{
-            this._divContainer.addEventListener("mousemove", touchmoveEvent, false);
+            if ('ontouchstart' in window){
             this._divContainer.addEventListener("touchmove", touchmoveEvent, false);
+            
+            }
+            else{
+                console.log(1)
+            this._divContainer.addEventListener("mousemove", touchmoveEvent, false);
+            }
             this.prevPoint = null;
             this.currPoint = screenToPlane([evt.clientX ?? evt.touches[0].clientX, evt.clientY ?? evt.touches[0].clientY]);
             if(! this.currPoint) return;
@@ -82,6 +88,7 @@ class App {
         }
 
         const touchmoveEvent = evt=>{
+            
             if(! this.currPoint) return;
             
             if (this.makeFlag){
@@ -126,22 +133,30 @@ class App {
         }
         
         const mouseUpEvent = ()=>{
-            
+            if ('ontouchstart' in window){
+                this._divContainer.removeEventListener("touchmove", touchmoveEvent, false);
+                
+            }
+            else{
             this._divContainer.removeEventListener("mousemove", touchmoveEvent, false);
+            
+            }
         }
         const drawTouchStart = ()=>{
             if(!this._isDrawOn){
                 this._drawButton.style.backgroundColor = "white";
                 this._dragButton.style.backgroundColor = "rgba(256,256,256,0.5)";
                 this._controls.enabled = false
+                if ('ontouchstart' in window){
                 this._divContainer.addEventListener("touchstart", touchstartEvent, false);
-
                 this._divContainer.removeEventListener("touchstart", pulldown, false);
+                this._divContainer.addEventListener("touchend", mouseUpEvent, false);
+                }
+                else{
                 this._divContainer.addEventListener("mousedown", touchstartEvent, false);
-
                 this._divContainer.removeEventListener("mousedown", pulldown, false);
                 this._divContainer.addEventListener("mouseup", mouseUpEvent, false);
-
+                }
                 this._isDrawOn = !this._isDrawOn
             }
         }
@@ -150,20 +165,28 @@ class App {
                 this._drawButton.style.backgroundColor = "rgba(256,256,256,0.5)";
                 this._dragButton.style.backgroundColor = "white";
                 this._controls.enabled = true;
+                if ('ontouchstart' in window){
                 this._divContainer.removeEventListener("touchstart", touchstartEvent, false);
-                this._divContainer.removeEventListener("touchmove", touchmoveEvent, false);
+                this._divContainer.addEventListener("touchend", mouseUpEvent, false);
                 this._divContainer.addEventListener("touchstart", pulldown, false);
+                }
+                else{
                 this._divContainer.removeEventListener("mousedown", touchstartEvent, false);
-                this._divContainer.removeEventListener("mousemove", touchmoveEvent, false);
+                this._divContainer.addEventListener("mouseup", mouseUpEvent, false);
                 this._divContainer.addEventListener("mousedown", pulldown, false);
-
+                }
                 this._isDrawOn = !this._isDrawOn
             }
         }
+        if ('ontouchstart' in window){
         this._drawButton.addEventListener("touchstart",drawTouchStart, false)
         this._dragButton.addEventListener("touchstart", dragTouchStart, false)
+        }
+        else
+        {
         this._drawButton.addEventListener("mousedown",drawTouchStart, false)
         this._dragButton.addEventListener("mousedown", dragTouchStart, false)
+        }
     }
 
 
@@ -180,10 +203,14 @@ class App {
         const backTouchEnd = ()=>{
             this._backButton.style.backgroundColor = "rgba(256,256,256,0.5)"
         }
+        if ('ontouchstart' in window){
         this._backButton.addEventListener('touchstart', backTouchStart, false)
         this._backButton.addEventListener("touchend", backTouchEnd, false)
+        }
+        else{
         this._backButton.addEventListener('mousedown', backTouchStart, false)
         this._backButton.addEventListener("mouseup", backTouchEnd, false)
+        }
     }
 
 

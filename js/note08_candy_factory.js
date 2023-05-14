@@ -228,8 +228,8 @@ class App {
 			if ( event.isPrimary === false ) return;
 			this.isTouch = true;
 
-			this._divContainer.addEventListener( 'touchend', onTouchEnd );
-			this._divContainer.addEventListener( 'mouseup', onTouchEnd );
+			if ('ontouchstart' in window) this._divContainer.addEventListener( 'touchend', onTouchEnd );
+			else this._divContainer.addEventListener( 'mouseup', onTouchEnd );
 			
 
 		}
@@ -240,8 +240,8 @@ class App {
 			this._divContainer.removeEventListener( 'touchend', onTouchEnd );
 			this._divContainer.removeEventListener( 'mouseup', onTouchEnd );
 		}
-		this._divContainer.addEventListener( 'touchstart', onTouchStart );
-		this._divContainer.addEventListener( 'mousedown', onTouchStart );
+		if ('ontouchstart' in window) this._divContainer.addEventListener( 'touchstart', onTouchStart );
+		else this._divContainer.addEventListener( 'mousedown', onTouchStart );
 	}
 	_setupTween(){
 		const maxOverhang = 15;
