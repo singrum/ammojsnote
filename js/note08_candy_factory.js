@@ -440,7 +440,7 @@ class App {
 		this.cutter = cutter
 		
 		//conveyer
-		const conveyerWidth = 30;
+		const conveyerWidth = 90;
 		const conveyerHeight = 2;
 		const conveyerDepth = 20
 		const shape = new THREE.Shape();
