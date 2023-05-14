@@ -72,8 +72,10 @@ class App {
         }
 
         const touchstartEvent = evt=>{
+            this._divContainer.addEventListener("mousemove", touchmoveEvent, false);
+            this._divContainer.addEventListener("touchmove", touchmoveEvent, false);
             this.prevPoint = null;
-            this.currPoint = screenToPlane([evt.touches[0].clientX, evt.touches[0].clientY]);
+            this.currPoint = screenToPlane([evt.clientX ?? evt.touches[0].clientX, evt.clientY ?? evt.touches[0].clientY]);
             if(! this.currPoint) return;
             this.distance = 0;
             this.makeFlag = false;
@@ -99,7 +101,7 @@ class App {
                 this.currDominoPoint = this.currPoint;
             }
             this.prevPoint = this.currPoint;
-            this.currPoint = screenToPlane([evt.touches[0].clientX, evt.touches[0].clientY])
+            this.currPoint = screenToPlane([evt.clientX ?? evt.touches[0].clientX, evt.clientY ?? evt.touches[0].clientY])
             this.distance = distance(this.currDominoPoint, this.currPoint)
             
             if(! this.currPoint) return;
@@ -113,8 +115,8 @@ class App {
             const width = this._divContainer.clientWidth;
             const height = this._divContainer.clientHeight;
             const pt = {
-                x: (evt.touches[0].clientX / width) * 2 - 1,
-                y: - (evt.touches[0].clientY / height) * 2 + 1
+                x: ((evt.clientX ?? evt.touches[0].clientX) / width) * 2 - 1,
+                y: - ((evt.clientY ?? evt.touches[0].clientY) / height) * 2 + 1
             }
             raycaster.setFromCamera(pt, this._camera);
                 
@@ -123,44 +125,65 @@ class App {
             if(interObj[0])this.pull(interObj[0]);
         }
         
-
-        this._drawButton.addEventListener("touchstart",()=>{
+        const mouseUpEvent = ()=>{
+            
+            this._divContainer.removeEventListener("mousemove", touchmoveEvent, false);
+        }
+        const drawTouchStart = ()=>{
             if(!this._isDrawOn){
                 this._drawButton.style.backgroundColor = "white";
                 this._dragButton.style.backgroundColor = "rgba(256,256,256,0.5)";
                 this._controls.enabled = false
-                window.addEventListener("touchstart", touchstartEvent);
-                window.addEventListener("touchmove", touchmoveEvent);
-                window.removeEventListener("touchstart", pulldown);
+                this._divContainer.addEventListener("touchstart", touchstartEvent, false);
+
+                this._divContainer.removeEventListener("touchstart", pulldown, false);
+                this._divContainer.addEventListener("mousedown", touchstartEvent, false);
+
+                this._divContainer.removeEventListener("mousedown", pulldown, false);
+                this._divContainer.addEventListener("mouseup", mouseUpEvent, false);
+
                 this._isDrawOn = !this._isDrawOn
             }
-        })
-        this._dragButton.addEventListener("touchstart", ()=>{
+        }
+        const dragTouchStart = ()=>{
             if(this._isDrawOn){
                 this._drawButton.style.backgroundColor = "rgba(256,256,256,0.5)";
                 this._dragButton.style.backgroundColor = "white";
                 this._controls.enabled = true;
-                window.removeEventListener("touchstart", touchstartEvent);
-                window.removeEventListener("touchmove", touchmoveEvent);
-                window.addEventListener("touchstart", pulldown);
+                this._divContainer.removeEventListener("touchstart", touchstartEvent, false);
+                this._divContainer.removeEventListener("touchmove", touchmoveEvent, false);
+                this._divContainer.addEventListener("touchstart", pulldown, false);
+                this._divContainer.removeEventListener("mousedown", touchstartEvent, false);
+                this._divContainer.removeEventListener("mousemove", touchmoveEvent, false);
+                this._divContainer.addEventListener("mousedown", pulldown, false);
+
                 this._isDrawOn = !this._isDrawOn
             }
-        })
+        }
+        this._drawButton.addEventListener("touchstart",drawTouchStart, false)
+        this._dragButton.addEventListener("touchstart", dragTouchStart, false)
+        this._drawButton.addEventListener("mousedown",drawTouchStart, false)
+        this._dragButton.addEventListener("mousedown", dragTouchStart, false)
     }
 
 
     _setupBackButton(){
-        this._backButton.addEventListener('touchstart', evt => {
+        const backTouchStart = () => {
             this._backButton.style.backgroundColor = "white";
             if(this._dominoStack.length === 0) return;
             
             const domino = this._dominoStack.pop()
             this._scene.remove(domino)
             this._physicsWorld.removeRigidBody(domino.physicsBody)
-        }, false)
-        this._backButton.addEventListener("touchend", evt=>{
+            
+        }
+        const backTouchEnd = ()=>{
             this._backButton.style.backgroundColor = "rgba(256,256,256,0.5)"
-        })
+        }
+        this._backButton.addEventListener('touchstart', backTouchStart, false)
+        this._backButton.addEventListener("touchend", backTouchEnd, false)
+        this._backButton.addEventListener('mousedown', backTouchStart, false)
+        this._backButton.addEventListener("mouseup", backTouchEnd, false)
     }
 
 

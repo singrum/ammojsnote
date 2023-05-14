@@ -112,16 +112,6 @@ class App {
         const clone = this.group.clone();
         const animationAction = this.mixer.clipAction(animationClip, clone);
         clone.animationAction = animationAction;
-        // animationAction.clampWhenFinished = true;
-        // animationAction.loop = THREE.LoopOnce;
-        // animationAction.reset();
-        // animationAction.play();
-        // animationAction.paused = true;
-        // animationAction.time = 0;
-    
-        // animationAction.setEffectiveTimeScale(1);
-        // animationAction.setEffectiveWeight(1);
-        // animationAction.setLoop(THREE.LoopOnce, 0);
     
         animationAction.play();
         animationAction.paused = true;
@@ -283,11 +273,12 @@ class App {
                 bee.tween.forEach(e=> e.stop())
             })
             window.removeEventListener("touchend", touchEnd)
+            window.removeEventListener("mouseup", touchEnd)
         }
 
 
         const touchstartEvent = evt=>{
-            this.currPoint = [evt.touches[0].clientX, evt.touches[0].clientY]
+            this.currPoint = [evt.clientX ?? evt.touches[0].clientX, evt.clientY ?? evt.touches[0].clientY]
 
             if(isTouchHive(this.currPoint)){
                 this.addClone(this.group)
@@ -299,6 +290,7 @@ class App {
                 
                 beeFly();
                 window.addEventListener("touchend", touchEnd)
+                window.addEventListener("mouseup", touchEnd)
                 return;
             }
 
@@ -308,6 +300,7 @@ class App {
         }
         
         window.addEventListener("touchstart", touchstartEvent)
+        window.addEventListener("mousedown", touchstartEvent)
 
 
 	}

@@ -69,7 +69,9 @@ class App {
 	
 
 	_setupCamera() {
-		const width = this._divContainer.clientWidth;
+		// const width = this._divContainer.clientWidth;
+		const width = 400;
+		
 		const height = this._divContainer.clientHeight;
 		const aspectRatio = window.innerWidth / window.innerHeight;
 		const camera = new THREE.OrthographicCamera( -aspectRatio * width / 2, aspectRatio * width / 2, width / 2, -width /2, 0.000001, 100000 );
@@ -85,7 +87,7 @@ class App {
 
 
 	_setupBox(){
-		const w = 100;
+		const w = 300;
 		const h = 10;
 		const d = 1;
 
@@ -227,6 +229,7 @@ class App {
 			this.isTouch = true;
 
 			this._divContainer.addEventListener( 'touchend', onTouchEnd );
+			this._divContainer.addEventListener( 'mouseup', onTouchEnd );
 			
 
 		}
@@ -235,8 +238,10 @@ class App {
 			if ( event.isPrimary === false ) return;
 			this.isTouch = false;
 			this._divContainer.removeEventListener( 'touchend', onTouchEnd );
+			this._divContainer.removeEventListener( 'mouseup', onTouchEnd );
 		}
 		this._divContainer.addEventListener( 'touchstart', onTouchStart );
+		this._divContainer.addEventListener( 'mousedown', onTouchStart );
 	}
 	_setupTween(){
 		const maxOverhang = 15;
